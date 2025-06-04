@@ -1,5 +1,5 @@
 'use client'
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient"; // パスを修正
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -23,7 +23,7 @@ function formatJSTDate(dateStr: string) {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}`
 }
 
-export default function Home() {
+export default function UrlsPage() { // 関数名を UrlsPage に変更
   const [urls, setUrls] = useState<Url[]>([]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function Home() {
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-extrabold mb-8 text-center tracking-tight">My Pocket</h1>
+      <h1 className="text-3xl font-extrabold mb-8 text-center tracking-tight">My NEXT Pocket</h1>
       <ul className="space-y-6">
         {urls.map((url) => (
           <li key={url.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 flex flex-col gap-2">
@@ -53,4 +53,4 @@ export default function Home() {
       </ul>
     </div>
   );
-}
+} 
