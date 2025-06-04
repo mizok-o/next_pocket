@@ -1,18 +1,40 @@
 'use client'
 import { useState } from 'react'
+import { signIn } from "next-auth/react"
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    alert('ログイン処理は未実装です。')
-    setLoading(false)
+
+    try {
+      const result = await signIn("credentials", {
+        redirect: false, // エラー処理をクライアント側で行うためfalse
+        email,
+        password,
+      })
+
+      if (result?.error) {
+        setError(result.error)
+      } else if (result?.ok) {
+        // ログイン成功
+        router.push('/') // トップページへリダイレクト
+      } else {
+        setError("予期せぬログイン結果です。")
+      }
+    } catch (err: any) {
+      setError(err.message || "ログイン処理中にエラーが発生しました。")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
