@@ -30,8 +30,8 @@ export default function LoginPage() {
       } else {
         setError("予期せぬログイン結果です。")
       }
-    } catch (err: any) {
-      setError(err.message || "ログイン処理中にエラーが発生しました。")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "ログイン処理中にエラーが発生しました。")
     } finally {
       setLoading(false)
     }
