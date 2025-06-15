@@ -1,52 +1,48 @@
-import { supabase } from '@/app/supabaseClient';
-import { authOptions } from '@/lib/auth';
-import { verifyJWT } from '@/lib/jwt';
-import { getServerSession } from 'next-auth';
+import { supabaseAdmin, getUserId } from '@/lib/supabaseServer';
 import { NextResponse } from 'next/server';
-
-async function authenticateUser(request: Request): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  if (session?.user?.id) {
-    return session.user.id;
-  }
-
-  const authHeader = request.headers.get('Authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const payload = await verifyJWT(token);
-    return payload?.userId || null;
-  }
-
-  return null;
-}
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const userId = await authenticateUser(request);
+    const userId = await getUserId(request);
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const resolvedParams = await params;
-    const urlId = Number.parseInt(resolvedParams.id);
+    const urlId = Number.parseInt(resolvedParams.id, 10);
 
     if (Number.isNaN(urlId)) {
       return NextResponse.json({ error: 'Invalid URL ID' }, { status: 400 });
     }
 
-    const { error } = await supabase
+    // Validate user ID is numeric
+    const userIdInt = Number.parseInt(userId, 10);
+    if (Number.isNaN(userIdInt)) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+    }
+
+    // Use update with select to verify the row was actually updated
+    const { data, error } = await supabaseAdmin
       .from('urls')
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', urlId)
-      .eq('user_id', Number.parseInt(userId));
+      .eq('user_id', userIdInt)
+      .select()
+      .single();
 
     if (error) {
+      console.error('Database error:', error);
       return NextResponse.json({ error: 'Failed to delete URL' }, { status: 500 });
     }
 
+    if (!data) {
+      return NextResponse.json({ error: 'URL not found or not owned by user' }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    console.error('Server error:', err);
     return NextResponse.json({ error: 'Server error occurred' }, { status: 500 });
   }
 }

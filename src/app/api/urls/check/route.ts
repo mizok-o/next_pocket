@@ -1,28 +1,9 @@
-import { supabase } from '@/app/supabaseClient';
-import { authOptions } from '@/lib/auth';
-import { verifyJWT } from '@/lib/jwt';
-import { getServerSession } from 'next-auth';
+import { supabaseAdmin, getUserId } from '@/lib/supabaseServer';
 import { NextResponse } from 'next/server';
-
-async function authenticateUser(request: Request): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  if (session?.user?.id) {
-    return session.user.id;
-  }
-
-  const authHeader = request.headers.get('Authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const payload = await verifyJWT(token);
-    return payload?.userId || null;
-  }
-
-  return null;
-}
 
 export async function POST(request: Request) {
   try {
-    const userId = await authenticateUser(request);
+    const userId = await getUserId(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -32,15 +13,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    const { data } = await supabase
+    // Validate user ID is numeric
+    const userIdInt = Number.parseInt(userId, 10);
+    if (Number.isNaN(userIdInt)) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+    }
+
+    const { data, error } = await supabaseAdmin
       .from('urls')
       .select('id')
       .eq('url', url)
-      .eq('user_id', Number.parseInt(userId))
+      .eq('user_id', userIdInt)
       .is('deleted_at', null);
 
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Failed to check URL' }, { status: 500 });
+    }
+
     return NextResponse.json({ exists: data && data.length > 0 });
-  } catch {
+  } catch (err) {
+    console.error('Server error:', err);
     return NextResponse.json({ error: 'Server error occurred' }, { status: 500 });
   }
 }
