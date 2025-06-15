@@ -1,63 +1,65 @@
-'use client'
+'use client';
 
-import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { useSession } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 export default function ExtensionAuth() {
-  const { data: session, status } = useSession()
-  const [token, setToken] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const { data: session, status } = useSession();
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (session?.user?.id) {
-      generateToken()
+      generateToken();
     }
-  }, [session])
+  }, [session]);
 
   const generateToken = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await fetch('/api/auth/extension-token', {
-        method: 'POST'
-      })
-      
+        method: 'POST',
+      });
+
       if (!response.ok) {
-        throw new Error('Failed to generate token')
+        throw new Error('Failed to generate token');
       }
-      
-      const data = await response.json()
-      setToken(data.token)
-      
+
+      const data = await response.json();
+      setToken(data.token);
+
       // Chrome拡張機能にトークンを送信
-      window.postMessage({
-        type: 'AUTH_SUCCESS',
-        token: data.token,
-        expires_in: data.expires_in
-      }, '*')
-      
+      window.postMessage(
+        {
+          type: 'AUTH_SUCCESS',
+          token: data.token,
+          expires_in: data.expires_in,
+        },
+        '*'
+      );
+
       // 3秒後にタブを閉じる
       setTimeout(() => {
-        window.close()
-      }, 3000)
-      
-    } catch (error) {
+        window.close();
+      }, 3000);
+    } catch {
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
             <span className="text-gray-600 font-medium">認証状態を確認中...</span>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!session) {
@@ -68,15 +70,14 @@ export default function ExtensionAuth() {
             <h1 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">
               拡張機能認証
             </h1>
-            <p className="text-gray-600">
-              Chrome拡張機能を使用するには、まずログインが必要です
-            </p>
+            <p className="text-gray-600">Chrome拡張機能を使用するには、まずログインが必要です</p>
           </div>
           <button
+            type="button"
             onClick={() => signIn('google', { callbackUrl: '/auth/extension' })}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" role="img" aria-label="Google logo">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -99,44 +100,50 @@ export default function ExtensionAuth() {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full bg-white border border-gray-200 rounded-lg shadow-sm p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight mb-6">
-            認証完了
-          </h1>
-          
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight mb-6">認証完了</h1>
+
           {loading && (
             <div className="flex items-center justify-center space-x-3 py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
               <span className="text-gray-600 font-medium">トークンを生成中...</span>
             </div>
           )}
-          
+
           {token && (
             <div>
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-center mb-2">
-                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="h-6 w-6 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    role="img"
+                    aria-label="Check mark"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <p className="font-medium text-green-800 mb-1">認証成功</p>
-                <p className="text-sm text-green-700">
-                  Chrome拡張機能が使用可能になりました
-                </p>
+                <p className="text-sm text-green-700">Chrome拡張機能が使用可能になりました</p>
               </div>
-              <p className="text-gray-600 text-sm">
-                このタブは自動的に閉じられます...
-              </p>
+              <p className="text-gray-600 text-sm">このタブは自動的に閉じられます...</p>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

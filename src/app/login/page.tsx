@@ -1,20 +1,20 @@
-'use client'
+'use client';
 // import { useState } from 'react'
-import { signIn } from "next-auth/react"
+import { signIn } from 'next-auth/react';
 // import { useRouter } from 'next/navigation'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
 function LoginForm() {
-  const searchParams = useSearchParams()
-  const [authError, setAuthError] = useState<string | null>(null)
+  const searchParams = useSearchParams();
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    const error = searchParams.get('error')
+    const error = searchParams.get('error');
     if (error === 'AccessDenied') {
-      setAuthError('このメールアドレスは許可されていません。管理者にお問い合わせください。')
+      setAuthError('このメールアドレスは許可されていません。管理者にお問い合わせください。');
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   // const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
   //   e.preventDefault()
@@ -44,16 +44,24 @@ function LoginForm() {
   // }
 
   return (
-    <div className="bg-white dark:bg-zinc-800 p-8 rounded-lg shadow-md w-full max-w-md">
-      <h1 className="text-3xl font-bold mb-6 text-center text-zinc-900 dark:text-zinc-100">My Pocket</h1>
-      <p className="text-center text-zinc-600 dark:text-zinc-400 mb-6">ログイン</p>
-      {authError && <p className="mb-4 text-red-500 text-sm text-center">{authError}</p>}
-      
+    <div className="bg-white border border-gray-200 p-8 rounded-lg shadow-sm w-full max-w-md">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight mb-2">My Pocket</h1>
+        <p className="text-gray-600">アカウントにログイン</p>
+      </div>
+
+      {authError && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800 text-sm text-center">{authError}</p>
+        </div>
+      )}
+
       <button
+        type="button"
         onClick={() => signIn('google', { callbackUrl: '/' })}
-        className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+        className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
       >
-        <svg className="w-5 h-5" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" viewBox="0 0 24 24" role="img" aria-label="Google logo">
           <path
             fill="#4285F4"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -74,7 +82,7 @@ function LoginForm() {
         </svg>
         Googleでログイン
       </button>
-        
+
       {/* <form onSubmit={handleLogin} className="space-y-6">
         <div>
           <label
@@ -123,15 +131,22 @@ function LoginForm() {
         </div>
       </form> */}
     </div>
-  )
+  );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-100 dark:bg-zinc-900">
-      <Suspense fallback={<div>Loading...</div>}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Suspense
+        fallback={
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
+            <span className="text-gray-600 font-medium">読み込み中...</span>
+          </div>
+        }
+      >
         <LoginForm />
       </Suspense>
     </div>
-  )
+  );
 }
