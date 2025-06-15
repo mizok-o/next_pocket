@@ -12,7 +12,6 @@
   ],
   "host_permissions": [
     "http://localhost:3000/*",
-    "https://localhost:3000/*",
     "https://*/*"
   ],
   "background": {
@@ -20,8 +19,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://localhost:3000/*", "https://localhost:3000/*"],
-      "js": ["content-script.js"]
+      "matches": [
+        "http://localhost:3000/*"
+      ],
+      "js": [
+        "content-script.js"
+      ]
     }
   ],
   "action": {

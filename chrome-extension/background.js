@@ -1,109 +1,109 @@
-const API_BASE_URL = 'http://localhost:3000'
+import {
+  API_BASE_URL,
+  BADGE,
+  MESSAGE_TYPES,
+  MILLISECONDS_MULTIPLIER,
+  SPECIAL_URL_PREFIXES,
+  STORAGE_KEYS,
+} from './constants.js';
 
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  console.log('Tab activated:', activeInfo.tabId)
-  await checkCurrentTabUrl(activeInfo.tabId)
-})
+  await checkCurrentTabUrl(activeInfo.tabId);
+});
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
-    console.log('Tab updated:', tabId, tab.url)
-    await checkCurrentTabUrl(tabId)
+    await checkCurrentTabUrl(tabId);
   }
-})
+});
 
 async function checkCurrentTabUrl(tabId) {
   try {
-    const tab = await chrome.tabs.get(tabId)
-    console.log('Checking URL:', tab.url)
-    
-    if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-      console.log('Skipping special URL')
-      chrome.action.setBadgeText({ text: '', tabId })
-      return
+    const tab = await chrome.tabs.get(tabId);
+
+    if (
+      !tab.url ||
+      tab.url.startsWith(SPECIAL_URL_PREFIXES.CHROME) ||
+      tab.url.startsWith(SPECIAL_URL_PREFIXES.EXTENSION)
+    ) {
+      chrome.action.setBadgeText({ text: '', tabId });
+      return;
     }
-    
-    const token = await getAuthToken()
-    console.log('Auth token:', token ? 'EXISTS' : 'MISSING')
+
+    const token = await getAuthToken();
     if (!token) {
-      chrome.action.setBadgeText({ text: '', tabId })
-      return
+      chrome.action.setBadgeText({ text: '', tabId });
+      return;
     }
-    
-    const exists = await checkUrlExists(tab.url, token)
-    console.log('URL exists in database:', exists)
-    
+
+    const exists = await checkUrlExists(tab.url, token);
+
     if (exists) {
-      console.log('Setting check mark badge')
-      chrome.action.setBadgeText({ text: '✓', tabId })
-      chrome.action.setBadgeBackgroundColor({ color: '#16a34a', tabId })
+      chrome.action.setBadgeText({ text: BADGE.SAVED_TEXT, tabId });
+      chrome.action.setBadgeBackgroundColor({ color: BADGE.SAVED_COLOR, tabId });
     } else {
-      console.log('Clearing badge')
-      chrome.action.setBadgeText({ text: '', tabId })
+      chrome.action.setBadgeText({ text: '', tabId });
     }
-  } catch (error) {
-    console.error('Error checking URL:', error)
-    chrome.action.setBadgeText({ text: '', tabId })
+  } catch {
+    chrome.action.setBadgeText({ text: '', tabId });
   }
 }
 
 async function checkUrlExists(url, token) {
   try {
-    console.log('Checking URL exists:', url)
     const response = await fetch(`${API_BASE_URL}/api/urls/check`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url })
-    })
-    
-    console.log('API response status:', response.status)
-    
+      body: JSON.stringify({ url }),
+    });
+
     if (!response.ok) {
-      return false
+      return false;
     }
-    
-    const result = await response.json()
-    console.log('API result:', result)
-    return result.exists
-  } catch (error) {
-    console.error('Check URL error:', error)
-    return false
+
+    const result = await response.json();
+    return result.exists;
+  } catch {
+    return false;
   }
 }
 
 async function getAuthToken() {
-  const result = await chrome.storage.local.get(['jwt_token', 'token_expires'])
-  
-  if (!result.jwt_token) {
-    return null
+  const result = await chrome.storage.local.get([
+    STORAGE_KEYS.JWT_TOKEN,
+    STORAGE_KEYS.TOKEN_EXPIRES,
+  ]);
+
+  if (!result[STORAGE_KEYS.JWT_TOKEN]) {
+    return null;
   }
-  
-  if (result.token_expires && Date.now() > result.token_expires) {
-    await chrome.storage.local.remove(['jwt_token', 'token_expires'])
-    return null
+
+  if (result[STORAGE_KEYS.TOKEN_EXPIRES] && Date.now() > result[STORAGE_KEYS.TOKEN_EXPIRES]) {
+    await chrome.storage.local.remove([STORAGE_KEYS.JWT_TOKEN, STORAGE_KEYS.TOKEN_EXPIRES]);
+    return null;
   }
-  
-  return result.jwt_token
+
+  return result[STORAGE_KEYS.JWT_TOKEN];
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'AUTH_SUCCESS') {
+chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
+  if (message.type === MESSAGE_TYPES.AUTH_SUCCESS) {
     chrome.storage.local.set({
-      jwt_token: message.token,
-      token_expires: Date.now() + (message.expires_in * 1000)
-    })
+      [STORAGE_KEYS.JWT_TOKEN]: message.token,
+      [STORAGE_KEYS.TOKEN_EXPIRES]: Date.now() + message.expires_in * MILLISECONDS_MULTIPLIER,
+    });
   }
-  
-  if (message.type === 'URL_SAVED' || message.type === 'URL_DELETED') {
-    chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+
+  if (message.type === MESSAGE_TYPES.URL_SAVED || message.type === MESSAGE_TYPES.URL_DELETED) {
+    chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       if (tabs[0]) {
-        checkCurrentTabUrl(tabs[0].id)
+        checkCurrentTabUrl(tabs[0].id);
       }
-    })
+    });
   }
-  
-  return true
-})
+
+  return true;
+});
