@@ -40,7 +40,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-100 dark:bg-zinc-900">
       <div className="bg-white dark:bg-zinc-800 p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center text-zinc-900 dark:text-zinc-100">ログイン</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center text-zinc-900 dark:text-zinc-100">My Pocket</h1>
+        <p className="text-center text-zinc-600 dark:text-zinc-400 mb-6">ログイン</p>
         {error && <p className="mb-4 text-red-500 text-sm text-center">{error}</p>}
         <form onSubmit={handleLogin} className="space-y-6">
           <div>

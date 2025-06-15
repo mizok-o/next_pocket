@@ -11,10 +11,13 @@ export const authOptions: NextAuthOptions = {
 				email: { label: "Email", type: "email" },
 				password: { label: "Password", type: "password" },
 			},
-			async authorize(credentials) {
+			async authorize(credentials: Credentials | undefined) {
 				if (!credentials?.email || !credentials?.password) {
+					console.log("❌ 認証失敗: 認証情報が不足")
 					return null
 				}
+
+				console.log("🔍 ユーザー検索:", credentials.email)
 
 				const { data: user, error } = await supabase
 					.from("users")
@@ -22,9 +25,17 @@ export const authOptions: NextAuthOptions = {
 					.eq("email", credentials.email)
 					.single()
 
-				if (error || !user) {
+				if (error) {
+					console.log("❌ データベースエラー:", error)
 					return null
 				}
+
+				if (!user) {
+					console.log("❌ ユーザーが見つかりません:", credentials.email)
+					return null
+				}
+
+				console.log("✅ ユーザー発見:", user.email)
 
 				const isValidPassword = await bcrypt.compare(
 					credentials.password,
@@ -32,11 +43,14 @@ export const authOptions: NextAuthOptions = {
 				)
 
 				if (!isValidPassword) {
+					console.log("❌ パスワード不一致")
 					return null
 				}
 
+				console.log("✅ 認証成功:", user.email)
+
 				return {
-					id: user.id.toString(),
+					id: user.id,
 					email: user.email,
 				}
 			},
