@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import Providers from "./Providers";
+import type { Metadata } from 'next';
+import './globals.css';
+import Providers from './Providers';
 
 export const metadata: Metadata = {
-  title: "My Pocket",
-  description: "URLをストックして一覧表示するブックマーク管理アプリ",
+  title: 'My Pocket',
+  description: 'URLをストックして一覧表示するブックマーク管理アプリ',
 };
 
 export default function RootLayout({
