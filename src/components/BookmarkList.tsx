@@ -3,10 +3,20 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
+interface Url {
+  id: number
+  url: string
+  title: string | null
+  description: string | null
+  image_url: string | null
+  created_at: string
+}
+
 export default function BookmarkList() {
   const [urls, setUrls] = useState<Url[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null)
 
   useEffect(() => {
     fetchUrls()
@@ -44,6 +54,43 @@ export default function BookmarkList() {
     e.stopPropagation()
     window.open(url, '_blank')
   }
+
+  const handleMenuClick = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setOpenMenuId(openMenuId === id ? null : id)
+  }
+
+  const handleDelete = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      const response = await fetch(`/api/urls/${id}`, {
+        method: 'DELETE',
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete URL')
+      }
+      
+      setUrls(urls.filter(url => url.id !== id))
+      setOpenMenuId(null)
+    } catch (err) {
+      console.error('Delete error:', err)
+    }
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (openMenuId !== null) {
+        const target = e.target as HTMLElement
+        if (!target.closest('.menu-container')) {
+          setOpenMenuId(null)
+        }
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [openMenuId])
 
   if (loading) {
     return (
@@ -127,6 +174,40 @@ export default function BookmarkList() {
               </p>
             )}
           </div>
+          
+          <div className="absolute top-2 right-2 menu-container">
+            <button
+              onClick={(e) => handleMenuClick(url.id, e)}
+              className="p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full transition-all shadow-sm"
+              title="メニュー"
+            >
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                />
+              </svg>
+            </button>
+            
+            {openMenuId === url.id && (
+              <div className="absolute right-0 mt-1 bg-white rounded-md shadow-lg z-10 min-w-[120px]">
+                <button
+                  onClick={(e) => handleDelete(url.id, e)}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-md"
+                >
+                  削除
+                </button>
+              </div>
+            )}
+          </div>
+          
           <button
             onClick={(e) => handleNewTabClick(url.url, e)}
             className="absolute bottom-0 right-0 p-3 bg-gray-100 hover:bg-gray-200 transition-colors rounded-tl-lg"
