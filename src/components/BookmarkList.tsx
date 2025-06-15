@@ -3,14 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
-interface Url {
-  id: number
-  url: string
-  title: string | null
-  description: string | null
-  image_url: string | null
-  created_at: string
-}
+import type { Url } from '@/types'
 
 export default function BookmarkList() {
   const [urls, setUrls] = useState<Url[]>([])
@@ -28,8 +21,8 @@ export default function BookmarkList() {
       if (!response.ok) {
         throw new Error('Failed to fetch URLs')
       }
-      const { data } = await response.json()
-      setUrls(data)
+      const { data }: { data: Url[] } = await response.json()
+      setUrls(data || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
