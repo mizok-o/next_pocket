@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -17,7 +17,8 @@ export async function DELETE(
       )
     }
     
-    const urlId = parseInt(params.id)
+    const resolvedParams = await params
+    const urlId = parseInt(resolvedParams.id)
     
     // 論理削除（deleted_atに現在時刻を設定）
     const { error } = await supabase

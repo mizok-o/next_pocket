@@ -30,14 +30,6 @@ export default function BookmarkList() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    })
-  }
 
   const handleCardClick = (url: string) => {
     window.location.href = url
