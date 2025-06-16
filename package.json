@@ -12,7 +12,8 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css,html,vue,svelte}": "biome check --write --unsafe"
+    "src/**/*.{js,jsx,ts,tsx}": "biome check --write --unsafe",
+    "*.{json,css,html}": "biome check --write --unsafe"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
