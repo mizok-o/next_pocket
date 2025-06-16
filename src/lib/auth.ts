@@ -75,16 +75,11 @@ export const authOptions: NextAuthOptions = {
 
         // DBエラーがある場合（PGRST116以外）
         if (error && error.code !== "PGRST116") {
-          console.error("❌ データベースエラー:", error);
           return false;
         }
 
         // ユーザーが見つからない場合（PGRST116エラーまたはdata null）
         if (!existingUser) {
-          console.error("❌ ユーザーが見つからない - email:", user.email);
-          console.error(
-            "❌ このメールアドレスは許可されていません。管理者にお問い合わせください。"
-          );
           return false;
         }
 
@@ -102,14 +97,11 @@ export const authOptions: NextAuthOptions = {
 
         // DBエラーがある場合（PGRST116以外）
         if (error && error.code !== "PGRST116") {
-          console.error("❌ JWT データベースエラー:", error);
           return token;
         }
 
         if (dbUser) {
           token.id = dbUser.id.toString();
-        } else {
-          console.error("❌ JWT DBユーザー取得失敗 - ユーザーが見つからない");
         }
       }
       return token;
@@ -135,13 +127,10 @@ export const authOptions: NextAuthOptions = {
   },
   logger: {
     error(code, metadata) {
-      console.error("🚨 NextAuth Error:", code, metadata);
-      if (code === "SIGNIN_OAUTH_ERROR" || code === "OAUTH_CALLBACK_ERROR") {
-        console.error("❌ OAuth詳細エラー:", { code, metadata });
-      }
+      // Error logging disabled
     },
     warn(code) {
-      console.warn("⚠️ NextAuth Warning:", code);
+      // Warning logging disabled
     },
     debug(code, metadata) {
       // Debug information
