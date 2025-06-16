@@ -9,6 +9,13 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
     // CredentialsProvider({
     // 	name: "Credentials",
@@ -66,47 +73,69 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account }) {
+      console.log("🔍 SignIn callback:", { user: user?.email, provider: account?.provider });
+
       if (account?.provider === "google") {
+        console.log("🔑 Google認証開始:", user?.email);
+
         const { data: existingUser, error } = await supabase
           .from("users")
           .select("id")
           .eq("email", user.email || "")
           .single();
 
+        console.log("📊 DB検索結果:", { existingUser, error: error?.code });
+
         // DBエラーがある場合（PGRST116以外）
         if (error && error.code !== "PGRST116") {
+          console.log("❌ DB接続エラー:", error);
           return false;
         }
 
         // ユーザーが見つからない場合（PGRST116エラーまたはdata null）
         if (!existingUser) {
+          console.log("❌ ユーザー未登録:", user?.email);
           return false;
         }
 
+        console.log("✅ 認証成功:", user?.email);
         return true;
       }
+
+      console.log("❌ Google以外のプロバイダー:", account?.provider);
       return false;
     },
     async jwt({ token, user }) {
       if (user) {
+        console.log("🎫 JWT callback - ユーザー情報取得:", user?.email);
+
         const { data: dbUser, error } = await supabase
           .from("users")
           .select("id")
           .eq("email", user.email || "")
           .single();
 
+        console.log("🎫 JWT - DB検索結果:", { dbUser, error: error?.code });
+
         // DBエラーがある場合（PGRST116以外）
         if (error && error.code !== "PGRST116") {
+          console.log("❌ JWT - DB接続エラー:", error);
           return token;
         }
 
         if (dbUser) {
           token.id = dbUser.id.toString();
+          console.log("✅ JWT - トークンにID追加:", dbUser.id);
         }
       }
       return token;
     },
     async session({ session, token }) {
+      console.log("🔐 Session callback:", {
+        user: session.user?.email,
+        tokenId: token.id,
+      });
+
       if (session.user) {
         session.user.id = token.id as string;
       }
@@ -126,14 +155,14 @@ export const authOptions: NextAuthOptions = {
     },
   },
   logger: {
-    error() {
-      // Error logging disabled
+    error(code, metadata) {
+      console.error("🔥 NextAuth Error:", code, metadata);
     },
-    warn() {
-      // Warning logging disabled
+    warn(code) {
+      console.warn("⚠️ NextAuth Warning:", code);
     },
-    debug() {
-      // Debug information
+    debug(code, metadata) {
+      console.log("🐛 NextAuth Debug:", code, metadata);
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
