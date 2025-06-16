@@ -71,6 +71,7 @@ const manifestTemplate = {
   host_permissions: [`${API_BASE_URL}/*`, 'https://*/*'],
   background: {
     service_worker: 'background.js',
+    type: 'module',
   },
   content_scripts: [
     {

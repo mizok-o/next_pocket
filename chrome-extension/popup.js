@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPES.URL_SAVED });
 
     showSuccessState(response.data);
-  } catch {
+  } catch (error) {
     console.error('Error:', error);
     showErrorState(error.message);
   }
@@ -89,7 +89,7 @@ async function handleDelete() {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPES.URL_DELETED });
 
     window.close();
-  } catch {
+  } catch (_error) {
     deleteBtn.disabled = false;
     deleteBtn.textContent = '削除に失敗しました';
 

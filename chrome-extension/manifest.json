@@ -3,28 +3,16 @@
   "name": "My Pocket",
   "version": "1.0.0",
   "description": "Save bookmarks to My Pocket",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "notifications",
-    "scripting",
-    "tabs"
-  ],
-  "host_permissions": [
-    "http://localhost:3000/*",
-    "https://*/*"
-  ],
+  "permissions": ["activeTab", "storage", "notifications", "scripting", "tabs"],
+  "host_permissions": ["http://localhost:3000/*", "https://*/*"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
-      "matches": [
-        "http://localhost:3000/*"
-      ],
-      "js": [
-        "content-script.js"
-      ]
+      "matches": ["http://localhost:3000/*"],
+      "js": ["content-script.js"]
     }
   ],
   "action": {
