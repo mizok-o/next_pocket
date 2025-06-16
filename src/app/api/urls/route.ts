@@ -1,53 +1,38 @@
-import { supabase } from '@/app/supabaseClient';
-import { authOptions } from '@/lib/auth';
-import { verifyJWT } from '@/lib/jwt';
-import { getServerSession } from 'next-auth';
+import { supabaseAdmin, getUserId } from '@/lib/supabaseServer';
 import { NextResponse } from 'next/server';
-
-async function authenticateUser(request: Request): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  if (session?.user?.id) {
-    return session.user.id;
-  }
-
-  const authHeader = request.headers.get('Authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const payload = await verifyJWT(token);
-    return payload?.userId || null;
-  }
-
-  return null;
-}
 
 export async function GET(request: Request) {
   try {
-    const userId = await authenticateUser(request);
+    const userId = await getUserId(request);
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data, error } = await supabase
+    // Use supabaseAdmin with service role key - RLS will allow this through
+    // Manual user_id filtering provides the actual security layer
+    const { data, error } = await supabaseAdmin
       .from('urls')
       .select('*')
-      .eq('user_id', Number.parseInt(userId))
+      .eq('user_id', Number.parseInt(userId, 10))
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     if (error) {
+      console.error('Database error:', error);
       return NextResponse.json({ error: 'Failed to fetch URLs' }, { status: 500 });
     }
 
     return NextResponse.json({ data: data || [] });
-  } catch {
+  } catch (err) {
+    console.error('Server error:', err);
     return NextResponse.json({ error: 'Server error occurred' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const userId = await authenticateUser(request);
+    const userId = await getUserId(request);
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -60,24 +45,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    // Validate user ID is numeric
+    const userIdInt = Number.parseInt(userId, 10);
+    if (Number.isNaN(userIdInt)) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+    }
+
+    const { data, error } = await supabaseAdmin
       .from('urls')
       .insert({
         url,
         title,
         description,
         image_url,
-        user_id: Number.parseInt(userId),
+        user_id: userIdInt,
       })
       .select()
       .single();
 
     if (error) {
+      console.error('Database error:', error);
       return NextResponse.json({ error: 'Failed to create URL' }, { status: 500 });
     }
 
     return NextResponse.json({ data });
-  } catch {
+  } catch (err) {
+    console.error('Server error:', err);
     return NextResponse.json({ error: 'Server error occurred' }, { status: 500 });
   }
 }
