@@ -1,5 +1,37 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "include": [
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.json",
+      "**/*.jsonc",
+      "**/*.css",
+      "**/*.html",
+      "**/*.vue",
+      "**/*.svelte"
+    ],
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      ".next/**",
+      "out/**",
+      "coverage/**",
+      "**/*.min.js",
+      "**/*.min.css",
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml"
+    ]
+  },
   "organizeImports": {
     "enabled": true
   },
@@ -7,39 +39,37 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": {
-        "noExplicitAny": "error",
-        "noImplicitAnyLet": "error"
-      },
       "style": {
-        "noNonNullAssertion": "warn",
-        "useConst": "error",
-        "useTemplate": "error"
+        "noNonNullAssertion": "off"
       },
-      "correctness": {
-        "noUnusedVariables": "error",
-        "noUnusedImports": "error"
-      },
-      "complexity": {
-        "noBannedTypes": "error",
-        "noUselessConstructor": "error"
+      "suspicious": {
+        "noExplicitAny": "warn"
       }
     }
   },
   "formatter": {
     "enabled": true,
+    "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
+    "lineEnding": "lf",
     "lineWidth": 100
-  },
-  "files": {
-    "ignore": ["node_modules", ".next", "dist", "build", "*.min.js", "chrome-extension/icon.png"]
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "single",
+      "quoteStyle": "double",
       "trailingCommas": "es5",
-      "semicolons": "always"
+      "semicolons": "always",
+      "arrowParentheses": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true
+    },
+    "parser": {
+      "allowComments": true,
+      "allowTrailingCommas": true
     }
   }
 }
