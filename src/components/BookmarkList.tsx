@@ -224,10 +224,9 @@ export default function BookmarkList() {
           </div>
 
           <div className="absolute top-4 right-4 menu-container opacity-0 group-hover:opacity-100 transition-all duration-200">
-            <button
-              type="button"
+            <div
               onClick={(e) => handleMenuClick(url.id, e)}
-              className="p-2.5 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm"
+              className="p-2.5 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm cursor-pointer"
               title="メニュー"
             >
               <svg
@@ -245,7 +244,7 @@ export default function BookmarkList() {
                   d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
                 />
               </svg>
-            </button>
+            </div>
 
             {openMenuId === url.id && (
               <div className="absolute right-0 mt-2 bg-white/95 border border-slate-200/60 rounded-xl shadow-lg backdrop-blur-sm z-10 min-w-[120px] overflow-hidden">
