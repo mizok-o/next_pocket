@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 340px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #1d1d1f;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .container {
+      background: #ffffff;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+      animation: slideIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 20px;
+      min-height: 52px;
+    }
+
+    .status.loading {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .status.success {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status.error {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #e2e8f0;
+      border-top: 2px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .check-icon {
+      width: 18px;
+      height: 18px;
+      background: #16a34a;
+      border-radius: 50%;
+      margin-right: 10px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .check-icon::after {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 3px;
+      width: 3px;
+      height: 6px;
+      border: solid #ffffff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .button {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      background: #ffffff;
+      color: #374151;
+      position: relative;
+    }
+
+    .button:hover {
+      border-color: #d1d5db;
+      background: #f9fafb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-color: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+    }
+
+    .button.primary:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      border-color: #1d4ed8;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .button.danger {
+      background: #ffffff;
+      border-color: #fca5a5;
+      color: #dc2626;
+    }
+
+    .button.danger:hover {
+      background: #fef2f2;
+      border-color: #f87171;
+      color: #b91c1c;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+    }
+
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .button:disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status, .actions {
+      animation: fadeIn 200ms ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .button.danger:focus {
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <div id="loading-state" class="status loading">
+        <div class="spinner"></div>
+        保存中...
+      </div>
+      
+      <div id="success-state" class="hidden">
+        <div class="status success">
+          <div class="check-icon"></div>
+          保存しました
+        </div>
+        <div class="actions">
+          <button id="delete-btn" class="button danger">削除</button>
+          <button id="close-btn" class="button">閉じる</button>
+        </div>
+      </div>
+      
+      <div id="error-state" class="hidden">
+        <div class="status error">
+          エラーが発生しました
+        </div>
+        <div class="actions">
+          <button id="retry-btn" class="button primary">再試行</button>
+          <button id="auth-btn" class="button">認証</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
