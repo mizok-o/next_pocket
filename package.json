@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,html,vue,svelte}": "biome check --write --unsafe"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
@@ -20,6 +24,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^3.0.0",
@@ -31,6 +36,8 @@
     "eslint-config-next": "15.3.2",
     "jest": "^29.7.0",
     "jest-environment-node": "^29.7.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
     "tailwindcss": "^4",
     "ts-jest": "^29.1.1",
     "typescript": "^5"
