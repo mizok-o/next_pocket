@@ -1,20 +1,39 @@
-'use client';
-// import { useState } from 'react'
-import { signIn } from 'next-auth/react';
-// import { useRouter } from 'next/navigation'
-import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+"use client";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 function LoginForm() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    const error = searchParams.get('error');
-    if (error === 'AccessDenied') {
-      setAuthError('このメールアドレスは許可されていません。管理者にお問い合わせください。');
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "AccessDenied") {
+      setAuthError("このメールアドレスは許可されていません。管理者にお問い合わせください。");
     }
   }, [searchParams]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center space-x-3">
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
+        <span className="text-gray-600 font-medium">読み込み中...</span>
+      </div>
+    );
+  }
+
+  if (status === "authenticated") {
+    return null;
+  }
 
   // const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
   //   e.preventDefault()
@@ -58,7 +77,7 @@ function LoginForm() {
 
       <button
         type="button"
-        onClick={() => signIn('google', { callbackUrl: '/' })}
+        onClick={() => signIn("google", { callbackUrl: "/" })}
         className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" role="img" aria-label="Google logo">
