@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import type { Url } from '@/types';
+import type { Url } from "@/types";
 
 export default function BookmarkList() {
   const [urls, setUrls] = useState<Url[]>([]);
@@ -16,14 +16,17 @@ export default function BookmarkList() {
 
   const fetchUrls = async () => {
     try {
-      const response = await fetch('/api/urls');
+      const response = await fetch("/api/urls");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch URLs');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch URLs");
       }
+
       const { data }: { data: Url[] } = await response.json();
       setUrls(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -35,7 +38,7 @@ export default function BookmarkList() {
 
   const handleNewTabClick = (url: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   const handleMenuClick = (id: number, e: React.MouseEvent) => {
@@ -47,11 +50,11 @@ export default function BookmarkList() {
     e.stopPropagation();
     try {
       const response = await fetch(`/api/urls/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete URL');
+        throw new Error("Failed to delete URL");
       }
 
       setUrls(urls.filter((url) => url.id !== id));
@@ -63,14 +66,14 @@ export default function BookmarkList() {
     const handleClickOutside = (e: MouseEvent) => {
       if (openMenuId !== null) {
         const target = e.target as HTMLElement;
-        if (!target.closest('.menu-container')) {
+        if (!target.closest(".menu-container")) {
           setOpenMenuId(null);
         }
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, [openMenuId]);
 
   if (loading) {
@@ -147,30 +150,7 @@ export default function BookmarkList() {
               />
             </svg>
           </div>
-          <h3 className="text-slate-900 font-semibold mb-3 text-xl">
-            まだブックマークがありません
-          </h3>
-          <p className="text-slate-600 leading-relaxed mb-6">
-            Chrome拡張機能を使って気になるページを保存してみましょう
-          </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 text-blue-700 text-sm font-medium rounded-lg border border-blue-200/50">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-label="保存"
-            >
-              <title>保存</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-            ワンクリックで保存
-          </div>
+          <h3 className="text-slate-900 font-semibold mb-3 text-xl">ブックマークがありません</h3>
         </div>
       </div>
     );
@@ -224,7 +204,8 @@ export default function BookmarkList() {
           </div>
 
           <div className="absolute top-4 right-4 menu-container opacity-0 group-hover:opacity-100 transition-all duration-200">
-            <div
+            <button
+              type="button"
               onClick={(e) => handleMenuClick(url.id, e)}
               className="p-2.5 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm cursor-pointer"
               title="メニュー"
@@ -244,7 +225,7 @@ export default function BookmarkList() {
                   d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
                 />
               </svg>
-            </div>
+            </button>
 
             {openMenuId === url.id && (
               <div className="absolute right-0 mt-2 bg-white/95 border border-slate-200/60 rounded-xl shadow-lg backdrop-blur-sm z-10 min-w-[120px] overflow-hidden">

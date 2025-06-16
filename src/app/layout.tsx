@@ -1,10 +1,15 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import Providers from './Providers';
+import type { Metadata } from "next";
+import "./globals.css";
+import Providers from "./Providers";
 
 export const metadata: Metadata = {
-  title: 'My Pocket',
-  description: 'URLをストックして一覧表示するブックマーク管理アプリ',
+  title: "QuickMark",
+  description: "素早く簡単にブックマークを管理",
+  icons: {
+    icon: "/app-icon.png",
+    shortcut: "/app-icon.png",
+    apple: "/app-icon.png",
+  },
 };
 
 export default function RootLayout({

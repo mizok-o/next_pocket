@@ -1,22 +1,23 @@
-'use client';
+"use client";
 
-import BookmarkList from '@/components/BookmarkList';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import BookmarkList from "@/components/BookmarkList";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'loading') return;
+    if (status === "loading") return;
     if (!session) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [session, status, router]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex items-center space-x-3">
@@ -39,30 +40,20 @@ export default function Home() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                  <svg
-                    className="w-6 h-6 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <title>ブックマーク</title>
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                    />
-                  </svg>
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full shadow-lg" />
+                <Image
+                  src="/app-icon.png"
+                  alt="QuickMark"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 rounded-xl shadow-lg"
+                />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent tracking-tight">
-                My Pocket
+                QuickMark
               </h1>
             </div>
             <p className="text-slate-600 text-lg max-w-md mx-auto leading-relaxed">
-              保存したブックマークを美しく整理して管理
+              素早く、簡単に、美しくブックマークを管理
             </p>
           </div>
           <BookmarkList />
