@@ -118,21 +118,21 @@ export const authOptions: NextAuthOptions = {
     error: "/login", // 認証エラー時もログインページへ
   },
   events: {
-    async signIn({ user, account, profile, isNewUser }) {
+    async signIn() {
       // SignIn event
     },
-    async signOut({ session, token }) {
+    async signOut() {
       // SignOut event
     },
   },
   logger: {
-    error(code, metadata) {
+    error() {
       // Error logging disabled
     },
-    warn(code) {
+    warn() {
       // Warning logging disabled
     },
-    debug(code, metadata) {
+    debug() {
       // Debug information
     },
   },

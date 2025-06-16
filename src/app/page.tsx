@@ -2,6 +2,7 @@
 
 import BookmarkList from "@/components/BookmarkList";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -39,9 +40,11 @@ export default function Home() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="relative">
-                <img
+                <Image
                   src="/app-icon.png"
                   alt="QuickMark"
+                  width={48}
+                  height={48}
                   className="w-12 h-12 rounded-xl shadow-lg"
                 />
               </div>
