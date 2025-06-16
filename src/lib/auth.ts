@@ -1,14 +1,14 @@
-import type { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
+import type { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 // import CredentialsProvider from "next-auth/providers/credentials"
-import { supabase } from '../app/supabaseClient';
+import { supabase } from "../app/supabaseClient";
 // import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
     // CredentialsProvider({
     // 	name: "Credentials",
@@ -62,18 +62,29 @@ export const authOptions: NextAuthOptions = {
     // }),
   ],
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === 'google') {
-        const { data: existingUser } = await supabase
-          .from('users')
-          .select('id')
-          .eq('email', user.email || '')
+      if (account?.provider === "google") {
+        const { data: existingUser, error } = await supabase
+          .from("users")
+          .select("id")
+          .eq("email", user.email || "")
           .single();
 
+        // DBエラーがある場合（PGRST116以外）
+        if (error && error.code !== "PGRST116") {
+          console.error("❌ データベースエラー:", error);
+          return false;
+        }
+
+        // ユーザーが見つからない場合（PGRST116エラーまたはdata null）
         if (!existingUser) {
+          console.error("❌ ユーザーが見つからない - email:", user.email);
+          console.error(
+            "❌ このメールアドレスは許可されていません。管理者にお問い合わせください。"
+          );
           return false;
         }
 
@@ -83,15 +94,22 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user }) {
       if (user) {
-        // ユーザーIDを取得
-        const { data: dbUser } = await supabase
-          .from('users')
-          .select('id')
-          .eq('email', user.email || '')
+        const { data: dbUser, error } = await supabase
+          .from("users")
+          .select("id")
+          .eq("email", user.email || "")
           .single();
+
+        // DBエラーがある場合（PGRST116以外）
+        if (error && error.code !== "PGRST116") {
+          console.error("❌ JWT データベースエラー:", error);
+          return token;
+        }
 
         if (dbUser) {
           token.id = dbUser.id.toString();
+        } else {
+          console.error("❌ JWT DBユーザー取得失敗 - ユーザーが見つからない");
         }
       }
       return token;
@@ -104,8 +122,30 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/login',
-    error: '/login', // 認証エラー時もログインページへ
+    signIn: "/login",
+    error: "/login", // 認証エラー時もログインページへ
+  },
+  events: {
+    async signIn({ user, account, profile, isNewUser }) {
+      // SignIn event
+    },
+    async signOut({ session, token }) {
+      // SignOut event
+    },
+  },
+  logger: {
+    error(code, metadata) {
+      console.error("🚨 NextAuth Error:", code, metadata);
+      if (code === "SIGNIN_OAUTH_ERROR" || code === "OAUTH_CALLBACK_ERROR") {
+        console.error("❌ OAuth詳細エラー:", { code, metadata });
+      }
+    },
+    warn(code) {
+      console.warn("⚠️ NextAuth Warning:", code);
+    },
+    debug(code, metadata) {
+      // Debug information
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
