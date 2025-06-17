@@ -72,22 +72,8 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log("🔍 SignIn callback 開始:", {
-        userEmail: user?.email,
-        provider: account?.provider,
-        accountType: account?.type,
-        profileEmail: profile?.email,
-      });
-
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
-        console.log("🔑 Google認証処理開始:", {
-          userEmail: user?.email,
-          profileEmail: profile?.email,
-          userId: user?.id,
-          accountId: account?.providerAccountId,
-        });
-
         try {
           const { data: existingUser, error } = await supabase
             .from("users")
@@ -95,95 +81,43 @@ export const authOptions: NextAuthOptions = {
             .eq("email", user.email || "")
             .single();
 
-          console.log("📊 DB検索実行完了:", {
-            searchEmail: user.email,
-            foundUser: existingUser,
-            errorCode: error?.code,
-            errorMessage: error?.message,
-            errorDetails: error?.details,
-            errorHint: error?.hint,
-          });
-
           // DBエラーがある場合（PGRST116以外）
           if (error && error.code !== "PGRST116") {
-            console.error("❌ 重大なDB接続エラー:", {
-              code: error.code,
-              message: error.message,
-              details: error.details,
-              hint: error.hint,
-            });
             return false;
           }
 
           // ユーザーが見つからない場合（PGRST116エラーまたはdata null）
           if (!existingUser) {
-            console.error("❌ ユーザー未登録 - アクセス拒否:", {
-              email: user?.email,
-              errorCode: error?.code,
-              registeredUsersQuery: "SELECT email FROM users LIMIT 5", // デバッグ用
-            });
-
-            // 登録済みユーザー一覧をデバッグ出力
-            const { data: allUsers } = await supabase.from("users").select("email").limit(10);
-            console.log(
-              "📋 登録済みユーザー例:",
-              allUsers?.map((u) => u.email)
-            );
-
             return false;
           }
 
-          console.log("✅ 認証成功 - ユーザー確認完了:", {
-            email: user?.email,
-            userId: existingUser.id,
-          });
           return true;
-        } catch (dbError) {
-          console.error("💥 DB処理中の予期せぬエラー:", {
-            error: dbError,
-            userEmail: user?.email,
-          });
+        } catch {
           return false;
         }
       }
 
-      console.error("❌ 非対応プロバイダー:", {
-        provider: account?.provider,
-        supportedProviders: ["google"],
-      });
       return false;
     },
     async jwt({ token, user }) {
       if (user) {
-        console.log("🎫 JWT callback - ユーザー情報取得:", user?.email);
-
         const { data: dbUser, error } = await supabase
           .from("users")
           .select("id")
           .eq("email", user.email || "")
           .single();
 
-        console.log("🎫 JWT - DB検索結果:", { dbUser, error: error?.code });
-
-        // DBエラーがある場合（PGRST116以外）
         if (error && error.code !== "PGRST116") {
-          console.log("❌ JWT - DB接続エラー:", error);
           return token;
         }
 
         if (dbUser) {
           token.id = dbUser.id.toString();
-          console.log("✅ JWT - トークンにID追加:", dbUser.id);
         }
       }
       return token;
     },
     async session({ session, token }) {
-      console.log("🔐 Session callback:", {
-        user: session.user?.email,
-        tokenId: token.id,
-      });
-
       if (session.user) {
         session.user.id = token.id as string;
       }
@@ -200,28 +134,6 @@ export const authOptions: NextAuthOptions = {
     },
     async signOut() {
       // SignOut event
-    },
-  },
-  logger: {
-    error(code, metadata) {
-      console.error("🔥 NextAuth Error:", {
-        code,
-        metadata,
-        timestamp: new Date().toISOString(),
-      });
-    },
-    warn(code) {
-      console.warn("⚠️ NextAuth Warning:", {
-        code,
-        timestamp: new Date().toISOString(),
-      });
-    },
-    debug(code, metadata) {
-      console.log("🐛 NextAuth Debug:", {
-        code,
-        metadata,
-        timestamp: new Date().toISOString(),
-      });
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

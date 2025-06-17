@@ -17,11 +17,7 @@ export async function verifyJWT(token: string): Promise<{ userId: string } | nul
   try {
     const { payload } = await jwtVerify(token, secret);
     return { userId: payload.userId as string };
-  } catch (error) {
-    console.error("❌ JWT検証失敗:", {
-      error: error instanceof Error ? error.message : error,
-      tokenLength: token?.length,
-    });
+  } catch {
     return null;
   }
 }
