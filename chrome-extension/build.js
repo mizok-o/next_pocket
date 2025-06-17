@@ -7,6 +7,7 @@ const path = require('node:path');
 const environment = process.argv[2] || 'dev';
 
 if (!['dev', 'prod'].includes(environment)) {
+  process.stderr.write('Usage: node build.js [dev|prod]\n');
   process.exit(1);
 }
 
@@ -17,6 +18,7 @@ const sourceConstantsPath = path.join(extensionDir, `constants.${environment}.js
 const targetConstantsPath = path.join(extensionDir, 'constants.js');
 
 if (!fs.existsSync(sourceConstantsPath)) {
+  process.stderr.write(`Constants file not found: ${sourceConstantsPath}\n`);
   process.exit(1);
 }
 

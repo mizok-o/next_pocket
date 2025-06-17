@@ -14,9 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.close();
     }
   });
-  const _loadingState = document.getElementById('loading-state');
-  const _successState = document.getElementById('success-state');
-  const _errorState = document.getElementById('error-state');
 
   try {
     const tab = await getCurrentTab();
