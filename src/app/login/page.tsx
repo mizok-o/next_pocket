@@ -77,7 +77,10 @@ function LoginForm() {
 
       <button
         type="button"
-        onClick={() => signIn("google", { callbackUrl: "/" })}
+        onClick={() => {
+          console.log("🎯 Google ログインボタンクリック:", new Date().toISOString());
+          signIn("google", { callbackUrl: "/" });
+        }}
         className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" role="img" aria-label="Google logo">
