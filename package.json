@@ -9,7 +9,10 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "prepare": "husky"
+    "prepare": "husky",
+    "extension:build": "node chrome-extension/build.js dev",
+    "extension:build:dev": "node chrome-extension/build.js dev",
+    "extension:build:prod": "node chrome-extension/build.js prod"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": "biome check --write",

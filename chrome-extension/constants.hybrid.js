@@ -1,4 +1,13 @@
-export const API_BASE_URL = 'https://next-pocket-five.vercel.app';
+// ハイブリッド版：実行時にAPI URLを動的判定
+const detectApiUrl = () => {
+  // 現在のページURLで判定
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return 'http://localhost:3000';
+  }
+  return 'https://next-pocket-five.vercel.app';
+};
+
+export const API_BASE_URL = detectApiUrl();
 
 export const SPECIAL_URL_PREFIXES = {
   CHROME: 'chrome://',
