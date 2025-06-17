@@ -32,10 +32,6 @@ export default function BookmarkList() {
     }
   };
 
-  const handleCardClick = (url: string) => {
-    window.location.href = url;
-  };
-
   const handleNewTabClick = (url: string, e: React.MouseEvent) => {
     e.stopPropagation();
     window.open(url, "_blank");
