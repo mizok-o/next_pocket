@@ -32,10 +32,6 @@ export default function BookmarkList() {
     }
   };
 
-  const handleCardClick = (url: string) => {
-    window.location.href = url;
-  };
-
   const handleNewTabClick = (url: string, e: React.MouseEvent) => {
     e.stopPropagation();
     window.open(url, "_blank");
@@ -157,15 +153,13 @@ export default function BookmarkList() {
   }
 
   return (
-    <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {urls.map((url) => (
-        <button
+        <li
           key={url.id}
-          type="button"
-          onClick={() => handleCardClick(url.url)}
-          className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden cursor-pointer relative text-left w-full hover:-translate-y-1"
+          className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden relative text-left w-full hover:-translate-y-1"
         >
-          <div className="aspect-w-16 aspect-h-9 relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80">
+          <figure className="aspect-w-16 aspect-h-9 relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 rounded-lg" />
               <svg
@@ -184,26 +178,31 @@ export default function BookmarkList() {
                 />
               </svg>
             </div>
-          </div>
+          </figure>
 
-          <div className="p-6">
-            <h3 className="font-semibold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors text-lg leading-tight mb-2">
-              {url.title || url.url}
+          <article className="p-6">
+            <h3 className="mb-2">
+              <a
+                href={url.url}
+                className="font-semibold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors text-lg leading-tight block"
+              >
+                {url.title || url.url}
+              </a>
             </h3>
             {url.description && (
               <p className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed">
                 {url.description}
               </p>
             )}
-            <div className="mt-4 flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-slate-100/80 to-blue-100/50 rounded-lg text-xs text-slate-600 font-medium">
-                <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
+            <footer className="mt-4 flex items-center gap-2">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-slate-100/80 to-blue-100/50 rounded-lg text-xs text-slate-600 font-medium">
+                <span className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
                 {new URL(url.url).hostname}
-              </div>
-            </div>
-          </div>
+              </span>
+            </footer>
+          </article>
 
-          <div className="absolute top-4 right-4 menu-container opacity-0 group-hover:opacity-100 transition-all duration-200">
+          <nav className="absolute top-4 right-4 menu-container opacity-0 group-hover:opacity-100 transition-all duration-200">
             <button
               type="button"
               onClick={(e) => handleMenuClick(url.id, e)}
@@ -228,17 +227,19 @@ export default function BookmarkList() {
             </button>
 
             {openMenuId === url.id && (
-              <div className="absolute right-0 mt-2 bg-white/95 border border-slate-200/60 rounded-xl shadow-lg backdrop-blur-sm z-10 min-w-[120px] overflow-hidden">
-                <button
-                  type="button"
-                  onClick={(e) => handleDelete(url.id, e)}
-                  className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors font-medium"
-                >
-                  削除
-                </button>
-              </div>
+              <menu className="absolute right-0 mt-2 bg-white/95 border border-slate-200/60 rounded-xl shadow-lg backdrop-blur-sm z-10 min-w-[120px] overflow-hidden">
+                <li>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDelete(url.id, e)}
+                    className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors font-medium"
+                  >
+                    削除
+                  </button>
+                </li>
+              </menu>
             )}
-          </div>
+          </nav>
 
           <button
             type="button"
@@ -262,8 +263,8 @@ export default function BookmarkList() {
               />
             </svg>
           </button>
-        </button>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
