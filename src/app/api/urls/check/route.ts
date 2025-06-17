@@ -28,13 +28,11 @@ export async function POST(request: Request) {
       .is("deleted_at", null);
 
     if (error) {
-      console.error("Database error:", error);
       return NextResponse.json({ error: "Failed to check URL" }, { status: 500 });
     }
 
     return NextResponse.json({ exists: data && data.length > 0 });
-  } catch (err) {
-    console.error("Server error:", err);
+  } catch {
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
 }

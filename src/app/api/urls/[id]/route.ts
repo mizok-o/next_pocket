@@ -33,7 +33,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       .single();
 
     if (error) {
-      console.error("Database error:", error);
       return NextResponse.json({ error: "Failed to delete URL" }, { status: 500 });
     }
 
@@ -42,8 +41,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     }
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("Server error:", err);
+  } catch {
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
 }
