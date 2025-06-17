@@ -7,7 +7,6 @@ export async function GET(request: Request) {
     const userId = await getUserId(request);
 
     if (!userId) {
-      console.error("❌ 認証失敗 - userIdがnull");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -21,14 +20,11 @@ export async function GET(request: Request) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("❌ Database error:", error);
-
       return NextResponse.json({ error: "Failed to fetch URLs" }, { status: 500 });
     }
 
     return NextResponse.json({ data: data || [] });
-  } catch (err) {
-    console.error("❌ Server error:", err);
+  } catch {
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
 }
@@ -38,7 +34,6 @@ export async function POST(request: Request) {
     const userId = await getUserId(request);
 
     if (!userId) {
-      console.error("❌ POST認証失敗 - userIdがnull");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -68,14 +63,11 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error("❌ Database error:", error);
-
       return NextResponse.json({ error: "Failed to create URL" }, { status: 500 });
     }
 
     return NextResponse.json({ data });
-  } catch (err) {
-    console.error("Server error:", err);
+  } catch {
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
 }

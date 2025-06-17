@@ -5,9 +5,6 @@ import { getServerSession } from "next-auth";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 if (!supabaseUrl) {
-  console.error("❌ Supabase環境変数が設定されていません:", {
-    NEXT_PUBLIC_SUPABASE_URL: !!supabaseUrl,
-  });
   throw new Error("Supabase environment variables are not set");
 }
 
@@ -29,7 +26,6 @@ export async function getUserId(request?: Request): Promise<string | null> {
     }
   }
 
-  console.error("❌ ユーザーID取得失敗 - セッション・JWT共になし");
   return null;
 }
 

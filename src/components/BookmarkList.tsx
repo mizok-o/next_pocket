@@ -155,113 +155,113 @@ export default function BookmarkList() {
   return (
     <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {urls.map((url) => (
-        <li
-          key={url.id}
-          className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden relative text-left w-full hover:-translate-y-1"
-        >
-          <figure className="aspect-w-16 aspect-h-9 relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 rounded-lg" />
-              <svg
-                className="relative h-10 w-10 text-slate-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                role="img"
-                aria-label="No image"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-          </figure>
+        <li key={url.id} className="contents">
+          <button
+            type="button"
+            onClick={() => window.open(url.url, "_blank")}
+            className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden relative text-left w-full hover:-translate-y-1 cursor-pointer"
+          >
+            <figure className="aspect-w-16 aspect-h-9 relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 rounded-lg" />
+                <svg
+                  className="relative h-10 w-10 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  role="img"
+                  aria-label="No image"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+            </figure>
 
-          <article className="p-6">
-            <h3 className="mb-2">
-              <a
-                href={url.url}
-                className="font-semibold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors text-lg leading-tight block"
-              >
-                {url.title || url.url}
-              </a>
-            </h3>
-            {url.description && (
-              <p className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed">
-                {url.description}
-              </p>
-            )}
-            <footer className="mt-4 flex items-center gap-2">
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-slate-100/80 to-blue-100/50 rounded-lg text-xs text-slate-600 font-medium">
-                <span className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
-                {new URL(url.url).hostname}
-              </span>
-            </footer>
-          </article>
+            <article className="p-6">
+              <h3 className="mb-2">
+                <span className="font-semibold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors text-lg leading-tight block">
+                  {url.title || url.url}
+                </span>
+              </h3>
+              {url.description && (
+                <p className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed">
+                  {url.description}
+                </p>
+              )}
+              <footer className="mt-4 flex items-center gap-2">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-slate-100/80 to-blue-100/50 rounded-lg text-xs text-slate-600 font-medium">
+                  <span className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
+                  {new URL(url.url).hostname}
+                </span>
+              </footer>
+            </article>
 
-          <nav className="absolute top-4 right-4 menu-container opacity-0 group-hover:opacity-100 transition-all duration-200">
+            <nav className="absolute top-4 right-4 menu-container transition-all duration-200">
+              <button
+                type="button"
+                onClick={(e) => handleMenuClick(url.id, e)}
+                className="p-2.5 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm cursor-pointer"
+                title="メニュー"
+              >
+                <svg
+                  className="w-4 h-4 text-slate-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  role="img"
+                  aria-label="Menu"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
+
+              {openMenuId === url.id && (
+                <menu className="absolute right-0 mt-2 bg-white/95 border border-slate-200/60 rounded-xl shadow-lg backdrop-blur-sm z-10 min-w-[120px] overflow-hidden">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDelete(url.id, e)}
+                      className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
+                    >
+                      削除
+                    </button>
+                  </li>
+                </menu>
+              )}
+            </nav>
+
             <button
               type="button"
-              onClick={(e) => handleMenuClick(url.id, e)}
-              className="p-2.5 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm cursor-pointer"
-              title="メニュー"
+              onClick={(e) => handleNewTabClick(url.url, e)}
+              className="absolute bottom-0 right-0 p-4 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 hover:from-blue-500/20 hover:to-indigo-500/20 border-t border-l border-blue-200/50 rounded-tl-xl transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm cursor-pointer"
+              title="新しいタブで開く"
             >
               <svg
-                className="w-4 h-4 text-slate-600"
+                className="w-3.5 h-3.5 text-blue-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
                 role="img"
-                aria-label="Menu"
+                aria-label="Open in new tab"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                 />
               </svg>
             </button>
-
-            {openMenuId === url.id && (
-              <menu className="absolute right-0 mt-2 bg-white/95 border border-slate-200/60 rounded-xl shadow-lg backdrop-blur-sm z-10 min-w-[120px] overflow-hidden">
-                <li>
-                  <button
-                    type="button"
-                    onClick={(e) => handleDelete(url.id, e)}
-                    className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors font-medium"
-                  >
-                    削除
-                  </button>
-                </li>
-              </menu>
-            )}
-          </nav>
-
-          <button
-            type="button"
-            onClick={(e) => handleNewTabClick(url.url, e)}
-            className="absolute bottom-0 right-0 p-4 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 hover:from-blue-500/20 hover:to-indigo-500/20 border-t border-l border-blue-200/50 rounded-tl-xl transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm cursor-pointer"
-            title="新しいタブで開く"
-          >
-            <svg
-              className="w-3.5 h-3.5 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              role="img"
-              aria-label="Open in new tab"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
           </button>
         </li>
       ))}
