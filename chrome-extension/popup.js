@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     showSuccessState(response.data);
   } catch (error) {
-    console.error('Error:', error);
     showErrorState(error.message);
   }
 });
