@@ -2,52 +2,58 @@ import { supabase } from "@/app/supabaseClient";
 import { getUserId } from "@/lib/supabaseServer";
 import { NextResponse } from "next/server";
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  favoriteUpdateRequest: Request, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const userId = await getUserId(request);
+    const authenticatedUserId = await getUserId(favoriteUpdateRequest);
 
-    if (!userId) {
+    if (!authenticatedUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const resolvedParams = await params;
-    const urlId = Number.parseInt(resolvedParams.id, 10);
+    const bookmarkId = Number.parseInt(resolvedParams.id, 10);
 
-    if (Number.isNaN(urlId)) {
-      return NextResponse.json({ error: "Invalid URL ID" }, { status: 400 });
+    if (Number.isNaN(bookmarkId)) {
+      return NextResponse.json({ error: "Invalid bookmark ID" }, { status: 400 });
     }
 
-    const body = await request.json();
-    const { is_favorite } = body;
+    const requestBody = await favoriteUpdateRequest.json();
+    const { is_favorite: updatedIsFavoriteStatus } = requestBody;
 
-    if (typeof is_favorite !== "boolean") {
+    if (typeof updatedIsFavoriteStatus !== "boolean") {
       return NextResponse.json({ error: "is_favorite must be a boolean" }, { status: 400 });
     }
 
-    const userIdInt = Number.parseInt(userId, 10);
-    if (Number.isNaN(userIdInt)) {
+    const authenticatedUserIdAsNumber = Number.parseInt(authenticatedUserId, 10);
+    if (Number.isNaN(authenticatedUserIdAsNumber)) {
       return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    // Update favorite status in database
+    const { data: updatedBookmark, error: databaseUpdateError } = await supabase
       .from("urls")
-      .update({ is_favorite })
-      .eq("id", urlId)
-      .eq("user_id", userIdInt)
+      .update({ is_favorite: updatedIsFavoriteStatus })
+      .eq("id", bookmarkId)
+      .eq("user_id", authenticatedUserIdAsNumber)
       .is("deleted_at", null)
       .select()
       .single();
 
-    if (error) {
+    if (databaseUpdateError) {
+      console.error('Database error updating favorite status:', databaseUpdateError);
       return NextResponse.json({ error: "Failed to update favorite status" }, { status: 500 });
     }
 
-    if (!data) {
-      return NextResponse.json({ error: "URL not found or not owned by user" }, { status: 404 });
+    if (!updatedBookmark) {
+      return NextResponse.json({ error: "Bookmark not found or not owned by user" }, { status: 404 });
     }
 
-    return NextResponse.json({ data });
-  } catch {
+    return NextResponse.json({ data: updatedBookmark });
+  } catch (unexpectedError) {
+    console.error('Unexpected error in favorite update API:', unexpectedError);
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
 }

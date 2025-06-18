@@ -58,43 +58,49 @@ export default function BookmarkList() {
     } catch {}
   };
 
-  const handleFavoriteToggle = async (id: number, currentFavoriteStatus: boolean, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const toggleFavoriteStatusWithOptimisticUpdate = async (
+    bookmarkId: number, 
+    currentIsFavoriteStatus: boolean, 
+    clickEvent: React.MouseEvent
+  ) => {
+    clickEvent.stopPropagation();
     
-    const newFavoriteStatus = !currentFavoriteStatus;
+    const updatedIsFavoriteStatus = !currentIsFavoriteStatus;
     
-    // Optimistic update
-    setUrls(prevUrls => 
-      prevUrls.map(url => {
-        if (url.id === id) {
-          return { ...url, is_favorite: newFavoriteStatus };
+    // IMMEDIATE UI UPDATE: Show new state instantly for better user experience
+    setUrls(previousUrls => 
+      previousUrls.map(bookmarkUrl => {
+        if (bookmarkUrl.id === bookmarkId) {
+          return { ...bookmarkUrl, is_favorite: updatedIsFavoriteStatus };
         }
-        return url;
+        return bookmarkUrl;
       })
     );
 
+    // BACKEND SYNC: Update database in background
     try {
-      const response = await fetch(`/api/urls/${id}/favorite`, {
+      const favoriteUpdateResponse = await fetch(`/api/urls/${bookmarkId}/favorite`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ is_favorite: newFavoriteStatus }),
+        body: JSON.stringify({ is_favorite: updatedIsFavoriteStatus }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update favorite status");
+      if (!favoriteUpdateResponse.ok) {
+        throw new Error("Failed to sync favorite status with server");
       }
-    } catch {
-      // Revert optimistic update on error
-      setUrls(prevUrls => 
-        prevUrls.map(url => {
-          if (url.id === id) {
-            return { ...url, is_favorite: currentFavoriteStatus };
+    } catch (syncError) {
+      // ROLLBACK: Revert UI to original state if backend sync fails
+      setUrls(previousUrls => 
+        previousUrls.map(bookmarkUrl => {
+          if (bookmarkUrl.id === bookmarkId && bookmarkUrl.is_favorite === updatedIsFavoriteStatus) {
+            return { ...bookmarkUrl, is_favorite: currentIsFavoriteStatus };
           }
-          return url;
+          return bookmarkUrl;
         })
       );
+      console.error('Failed to sync favorite status:', syncError);
     }
   };
 
@@ -211,7 +217,7 @@ export default function BookmarkList() {
             {/* Favorite star icon */}
             <button
               type="button"
-              onClick={(e) => handleFavoriteToggle(url.id, url.is_favorite, e)}
+              onClick={(clickEvent) => toggleFavoriteStatusWithOptimisticUpdate(url.id, url.is_favorite, clickEvent)}
               className="absolute top-4 left-4 z-10 p-2 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm cursor-pointer"
               title={url.is_favorite ? "お気に入りから削除" : "お気に入りに追加"}
               aria-label={url.is_favorite ? "お気に入りから削除" : "お気に入りに追加"}
