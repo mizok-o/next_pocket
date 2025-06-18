@@ -29,19 +29,13 @@ fs.copyFileSync(sourceConstantsPath, targetConstantsPath);
 const getManifestConfig = () => {
   if (environment === 'dev') {
     return {
-      name: 'My Pocket (Dev)',
-      version: '1.0.0-dev',
       host_permissions: ['http://localhost:3000/*', 'https://*/*'],
-      content_scripts_matches: ['http://localhost:3000/*'],
-      description: 'Save bookmarks to My Pocket (Development)'
+      content_scripts_matches: ['http://localhost:3000/*']
     };
   }
   return {
-    name: 'My Pocket',
-    version: '1.0.0',
     host_permissions: ['https://next-pocket-five.vercel.app/*', 'https://*/*'],
-    content_scripts_matches: ['https://next-pocket-five.vercel.app/*'],
-    description: 'Save bookmarks to My Pocket'
+    content_scripts_matches: ['https://next-pocket-five.vercel.app/*']
   };
 };
 
@@ -49,9 +43,9 @@ const config = getManifestConfig();
 
 const manifestContent = {
   manifest_version: 3,
-  name: config.name,
-  version: config.version,
-  description: config.description,
+  name: 'My Pocket',
+  version: '1.0.0',
+  description: 'Save bookmarks to My Pocket',
   permissions: ['activeTab', 'storage', 'notifications', 'scripting', 'tabs'],
   host_permissions: config.host_permissions,
   background: {
@@ -65,7 +59,7 @@ const manifestContent = {
     },
   ],
   action: {
-    default_title: `Save to ${config.name}`,
+    default_title: 'Save to My Pocket',
     default_popup: 'popup.html',
   },
   icons: {

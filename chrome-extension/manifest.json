@@ -4,14 +4,14 @@
   "version": "1.0.0",
   "description": "Save bookmarks to My Pocket",
   "permissions": ["activeTab", "storage", "notifications", "scripting", "tabs"],
-  "host_permissions": ["https://next-pocket-five.vercel.app/*", "https://*/*"],
+  "host_permissions": ["http://localhost:3000/*", "https://*/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["https://next-pocket-five.vercel.app/*"],
+      "matches": ["http://localhost:3000/*"],
       "js": ["content-script.js"]
     }
   ],
