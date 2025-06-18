@@ -64,9 +64,14 @@ export default function BookmarkList() {
     const newFavoriteStatus = !currentFavoriteStatus;
     
     // Optimistic update
-    setUrls(urls.map(url => 
-      url.id === id ? { ...url, is_favorite: newFavoriteStatus } : url
-    ));
+    setUrls(prevUrls => 
+      prevUrls.map(url => {
+        if (url.id === id) {
+          return { ...url, is_favorite: newFavoriteStatus };
+        }
+        return url;
+      })
+    );
 
     try {
       const response = await fetch(`/api/urls/${id}/favorite`, {
@@ -82,9 +87,14 @@ export default function BookmarkList() {
       }
     } catch {
       // Revert optimistic update on error
-      setUrls(urls.map(url => 
-        url.id === id ? { ...url, is_favorite: currentFavoriteStatus } : url
-      ));
+      setUrls(prevUrls => 
+        prevUrls.map(url => {
+          if (url.id === id) {
+            return { ...url, is_favorite: currentFavoriteStatus };
+          }
+          return url;
+        })
+      );
     }
   };
 
@@ -186,9 +196,16 @@ export default function BookmarkList() {
     <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {urls.map((url) => (
         <li key={url.id} className="contents">
-          <button
-            type="button"
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => window.open(url.url, "_blank")}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.open(url.url, "_blank");
+              }
+            }}
             className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden relative text-left w-full hover:-translate-y-1 cursor-pointer"
           >
             {/* Favorite star icon */}
@@ -321,7 +338,7 @@ export default function BookmarkList() {
                 />
               </svg>
             </button>
-          </button>
+          </div>
         </li>
       ))}
     </ul>
