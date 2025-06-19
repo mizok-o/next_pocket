@@ -44,7 +44,7 @@ function LoginForm() {
 
       {authError && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm text-center">{authError}</p>
+          <p className="text-red-500 text-sm mt-2 text-center">{authError}</p>
         </div>
       )}
 
