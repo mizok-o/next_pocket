@@ -2,58 +2,55 @@ import { supabase } from "@/app/supabaseClient";
 import { getUserId } from "@/lib/supabaseServer";
 import { NextResponse } from "next/server";
 
-export async function PUT(
-  favoriteUpdateRequest: Request, 
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const authenticatedUserId = await getUserId(favoriteUpdateRequest);
+    const userId = await getUserId(request);
 
-    if (!authenticatedUserId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!userId) {
+      return NextResponse.json({ error: "認証されていません" }, { status: 401 });
     }
 
-    const resolvedParams = await params;
-    const bookmarkId = Number.parseInt(resolvedParams.id, 10);
+    const { id } = await params;
+    const urlId = Number.parseInt(id, 10);
 
-    if (Number.isNaN(bookmarkId)) {
-      return NextResponse.json({ error: "Invalid bookmark ID" }, { status: 400 });
+    if (Number.isNaN(urlId)) {
+      return NextResponse.json({ error: "無効なURLのIDです" }, { status: 400 });
     }
 
-    const requestBody = await favoriteUpdateRequest.json();
-    const { is_favorite: updatedIsFavoriteStatus } = requestBody;
+    const body = await request.json();
+    const { is_favorite } = body;
 
-    if (typeof updatedIsFavoriteStatus !== "boolean") {
-      return NextResponse.json({ error: "is_favorite must be a boolean" }, { status: 400 });
+    if (typeof is_favorite !== "boolean") {
+      return NextResponse.json(
+        { error: "is_favoriteはtrue/falseで指定してください" },
+        { status: 400 }
+      );
     }
 
-    const authenticatedUserIdAsNumber = Number.parseInt(authenticatedUserId, 10);
-    if (Number.isNaN(authenticatedUserIdAsNumber)) {
-      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
-    }
-
-    // Update favorite status in database
-    const { data: updatedBookmark, error: databaseUpdateError } = await supabase
+    const { data: updatedUrl, error } = await supabase
       .from("urls")
-      .update({ is_favorite: updatedIsFavoriteStatus })
-      .eq("id", bookmarkId)
-      .eq("user_id", authenticatedUserIdAsNumber)
+      .update({ is_favorite })
+      .eq("id", urlId)
+      .eq("user_id", Number.parseInt(userId, 10))
       .is("deleted_at", null)
       .select()
       .single();
 
-    if (databaseUpdateError) {
-      console.error('Database error updating favorite status:', databaseUpdateError);
-      return NextResponse.json({ error: "Failed to update favorite status" }, { status: 500 });
+    if (error) {
+      console.error("Database error updating favorite status:", error);
+      return NextResponse.json({ error: "お気に入りの更新に失敗しました" }, { status: 500 });
     }
 
-    if (!updatedBookmark) {
-      return NextResponse.json({ error: "Bookmark not found or not owned by user" }, { status: 404 });
+    if (!updatedUrl) {
+      return NextResponse.json(
+        { error: "URLが見つからないか、アクセス権限がありません" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ data: updatedBookmark });
-  } catch (unexpectedError) {
-    console.error('Unexpected error in favorite update API:', unexpectedError);
-    return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
+    return NextResponse.json({ data: updatedUrl });
+  } catch (error) {
+    console.error("Unexpected error in favorite update API:", error);
+    return NextResponse.json({ error: "サーバーエラーが発生しました" }, { status: 500 });
   }
 }
