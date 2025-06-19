@@ -2,6 +2,7 @@
   "name": "quickmark",
   "version": "0.1.0",
   "private": true,
+  "description": "Next.js + Supabase + Chrome拡張機能のブックマーク管理アプリ",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

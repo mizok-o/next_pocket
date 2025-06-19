@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "My Pocket",
   "version": "1.0.0",
-  "description": "Save bookmarks to My Pocket",
+  "description": "My Pocketにブックマークを保存",
   "permissions": ["activeTab", "storage", "notifications", "scripting", "tabs"],
   "host_permissions": ["http://localhost:3000/*", "https://*/*"],
   "background": {
