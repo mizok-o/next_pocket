@@ -25,7 +25,11 @@ function LoginForm() {
   if (status === "loading") {
     return (
       <div className="flex items-center space-x-3">
-        <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
+        <div
+          className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
+          role="status"
+          aria-label="読み込み中"
+        />
         <span className="text-gray-600 font-medium">読み込み中...</span>
       </div>
     );
@@ -86,7 +90,11 @@ export default function LoginPage() {
       <Suspense
         fallback={
           <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
+            <div
+              className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
+              role="status"
+              aria-label="読み込み中"
+            />
             <span className="text-gray-600 font-medium">読み込み中...</span>
           </div>
         }
