@@ -8,4 +8,5 @@ export interface Url {
   created_at: string;
   user_id: number;
   deleted_at: string | null;
+  is_favorite: boolean;
 }
