@@ -30,7 +30,7 @@ const getManifestConfig = () => {
   if (environment === 'dev') {
     return {
       name: 'My Pocket (Dev)',
-      version: '1.0.0-dev',
+      version: '1.0.0',
       host_permissions: ['http://localhost:3000/*', 'https://*/*'],
       content_scripts_matches: ['http://localhost:3000/*'],
       description: 'Save bookmarks to My Pocket (Development)'
