@@ -107,8 +107,8 @@ export default function BookmarkList() {
               />
             </svg>
           </div>
-          <p className="text-red-800 mb-3 font-semibold text-lg">エラーが発生しました</p>
-          <p className="text-red-600/80 text-sm mb-8 leading-relaxed">{error}</p>
+          <p className="text-red-500 text-sm mt-2">エラーが発生しました</p>
+          <p className="text-red-500 text-sm mt-2">{error}</p>
           <button
             type="button"
             onClick={() => {
@@ -231,7 +231,7 @@ export default function BookmarkList() {
                     <button
                       type="button"
                       onClick={(e) => handleDelete(url.id, e)}
-                      className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
+                      className="block w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
                     >
                       削除
                     </button>
