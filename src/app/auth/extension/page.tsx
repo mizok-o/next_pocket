@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useSession } from 'next-auth/react';
-import { signIn } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 export default function ExtensionAuth() {
   const { data: session, status } = useSession();
@@ -18,12 +18,12 @@ export default function ExtensionAuth() {
   const generateToken = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/extension-token', {
-        method: 'POST',
+      const response = await fetch("/api/auth/extension-token", {
+        method: "POST",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate token');
+        throw new Error("Failed to generate token");
       }
 
       const data = await response.json();
@@ -32,11 +32,11 @@ export default function ExtensionAuth() {
       // Chrome拡張機能にトークンを送信
       window.postMessage(
         {
-          type: 'AUTH_SUCCESS',
+          type: "AUTH_SUCCESS",
           token: data.token,
           expires_in: data.expires_in,
         },
-        '*'
+        "*"
       );
 
       // 3秒後にタブを閉じる
@@ -49,7 +49,7 @@ export default function ExtensionAuth() {
     }
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -74,7 +74,7 @@ export default function ExtensionAuth() {
           </div>
           <button
             type="button"
-            onClick={() => signIn('google', { callbackUrl: '/auth/extension' })}
+            onClick={() => signIn("google", { callbackUrl: "/auth/extension" })}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" role="img" aria-label="Google logo">
