@@ -1,5 +1,6 @@
 import { authOptions } from "@/lib/auth";
 import { generateJWT } from "@/lib/jwt";
+import * as Sentry from "@sentry/nextjs";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -17,7 +18,8 @@ export async function POST() {
       token,
       expires_in: 604800,
     });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
