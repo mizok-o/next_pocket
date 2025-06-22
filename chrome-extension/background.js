@@ -44,7 +44,8 @@ async function checkCurrentTabUrl(tabId) {
     } else {
       chrome.action.setBadgeText({ text: "", tabId });
     }
-  } catch {
+  } catch (error) {
+    console.error("Chrome extension error:", error);
     chrome.action.setBadgeText({ text: "", tabId });
   }
 }
@@ -66,7 +67,8 @@ async function checkUrlExists(url, token) {
 
     const result = await response.json();
     return result.exists;
-  } catch {
+  } catch (error) {
+    console.error("Chrome extension URL check error:", error);
     return false;
   }
 }

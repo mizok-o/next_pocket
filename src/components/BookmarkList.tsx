@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 
 import type { Url } from "@/types";
@@ -26,7 +27,9 @@ export default function BookmarkList() {
       const { data }: { data: Url[] } = await response.json();
       setUrls(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      Sentry.captureException(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -55,7 +58,9 @@ export default function BookmarkList() {
 
       setUrls(urls.filter((url) => url.id !== id));
       setOpenMenuId(null);
-    } catch {}
+    } catch (err) {
+      Sentry.captureException(err);
+    }
   };
 
   useEffect(() => {
