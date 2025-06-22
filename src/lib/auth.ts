@@ -29,18 +29,39 @@ export const authOptions: NextAuthOptions = {
             .eq("email", user.email || "")
             .single();
 
-          // DBエラーがある場合（PGRST116以外）
+          // DBエラー（ユーザーが見つからない場合以外）
           if (error && error.code !== "PGRST116") {
+            console.error("Error fetching user:", error);
             return false;
           }
 
-          // ユーザーが見つからない場合（PGRST116エラーまたはdata null）
+          // ユーザーが存在しない場合は新規作成
           if (!existingUser) {
-            return false;
+            const { data: newUser, error: insertError } = await supabase
+              .from("users")
+              .insert({
+                email: user.email,
+                // パスワードはGoogle認証なので不要ですが、not-null制約のためダミーを入れます
+                password: "google-auth-no-password",
+              })
+              .select("id")
+              .single();
+
+            if (insertError) {
+              console.error("Error creating user:", insertError);
+              return false;
+            }
+
+            // 新規ユーザーのIDを後続の処理で使えるようにする
+            user.id = newUser.id.toString();
+          } else {
+            // 既存ユーザーのIDを後続の処理で使えるようにする
+            user.id = existingUser.id.toString();
           }
 
           return true;
-        } catch {
+        } catch (e) {
+          console.error("SignIn catch error:", e);
           return false;
         }
       }
@@ -48,20 +69,9 @@ export const authOptions: NextAuthOptions = {
       return false;
     },
     async jwt({ token, user }) {
-      if (user) {
-        const { data: dbUser, error } = await supabase
-          .from("users")
-          .select("id")
-          .eq("email", user.email || "")
-          .single();
-
-        if (error && error.code !== "PGRST116") {
-          return token;
-        }
-
-        if (dbUser) {
-          token.id = dbUser.id.toString();
-        }
+      // signInコールバックでuserオブジェクトにIDが設定されていれば、それをtokenに格納
+      if (user?.id) {
+        token.id = user.id;
       }
       return token;
     },
