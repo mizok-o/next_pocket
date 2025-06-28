@@ -1,0 +1,7 @@
+# Sentry configuration file
+# This file will be updated with actual values from Issue #36
+
+# Organization Slug (to be filled)
+# Project Slug (to be filled) 
+# DSN (to be filled)
+# Auth Token (to be filled)
