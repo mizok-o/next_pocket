@@ -37,6 +37,7 @@ jobs:
       - name: Slack通知
         uses: slackapi/slack-github-action@v1.26.0
         with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           payload: |
             {
               "text": "🚀 Vercelデプロイが完了しました",
@@ -85,4 +86,4 @@ jobs:
               ]
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
