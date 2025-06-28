@@ -5,6 +5,18 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveExtensions: [".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
   async headers() {
     return [
       {
