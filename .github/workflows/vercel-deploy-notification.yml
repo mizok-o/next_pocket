@@ -1,0 +1,88 @@
+name: Vercel Deploy Notification
+
+on:
+  deployment_status:
+
+jobs:
+  notify-slack:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: PR情報とassignee取得
+        uses: actions/github-script@v7
+        id: get-pr
+        with:
+          script: |
+            const branch = context.payload.deployment.ref;
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+            
+            if (prs.data.length > 0) {
+              const pr = prs.data[0];
+              const assignees = pr.assignees ? pr.assignees.map(a => a.login) : [];
+              return {
+                number: pr.number,
+                title: pr.title,
+                url: pr.html_url,
+                assignees: assignees
+              };
+            }
+            return null;
+
+      - name: Slack通知
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "🚀 Vercelデプロイが完了しました",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*🚀 Vercelデプロイが完了しました*\n${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).assignees[0] && format('<@{0}>', fromJSON(steps.get-pr.outputs.result).assignees[0]) || '<!channel>' }} デプロイが正常に完了しました"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*対象ブランチ:*\n`${{ github.event.deployment.ref }}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*デプロイ環境:*\n${{ github.event.deployment.environment }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*関連PR:*\n${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).title || 'ブランチへの直接プッシュ' }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*プレビューURL:*\n<${{ github.event.deployment_status.target_url }}|サイトを確認>"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "GitHubで確認"
+                      },
+                      "url": "${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).url || github.event.repository.html_url }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
