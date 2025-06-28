@@ -15,24 +15,83 @@ jobs:
         with:
           script: |
             const branch = context.payload.deployment.ref;
-            const prs = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: `${context.repo.owner}:${branch}`,
-              state: 'open'
-            });
+            const sha = context.payload.deployment.sha;
             
-            if (prs.data.length > 0) {
-              const pr = prs.data[0];
-              const assignees = pr.assignees ? pr.assignees.map(a => a.login) : [];
-              return {
-                number: pr.number,
-                title: pr.title,
-                url: pr.html_url,
-                assignees: assignees
-              };
+            try {
+              // Step 1: コミットSHAから関連PRを検索
+              const commitPRs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: sha
+              });
+              
+              if (commitPRs.data.length > 0) {
+                const pr = commitPRs.data[0];
+                return {
+                  number: pr.number,
+                  title: pr.title,
+                  url: pr.html_url,
+                  branch: branch
+                };
+              }
+              
+              // Step 2: コミットメッセージからPR番号を抽出
+              const commit = await github.rest.git.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: sha
+              });
+              
+              const commitMessage = commit.data.message;
+              const prMatch = commitMessage.match(/Merge pull request #(\d+)|#(\d+)/);
+              
+              if (prMatch) {
+                const prNumber = prMatch[1] || prMatch[2];
+                const pr = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: parseInt(prNumber)
+                });
+                
+                return {
+                  number: pr.data.number,
+                  title: pr.data.title,
+                  url: pr.data.html_url,
+                  branch: branch
+                };
+              }
+              
+              // Step 3: フォールバック - ブランチから検索
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${context.repo.owner}:${branch}`,
+                state: 'all',
+                sort: 'updated',
+                direction: 'desc'
+              });
+              
+              if (prs.data.length > 0) {
+                const pr = prs.data[0];
+                return {
+                  number: pr.number,
+                  title: pr.title,
+                  url: pr.html_url,
+                  branch: branch
+                };
+              }
+              
+            } catch (error) {
+              console.log('PR検索エラー:', error.message);
             }
-            return null;
+            
+            // PRが見つからない場合でもブランチ情報は返す
+            return {
+              number: null,
+              title: null,
+              url: null,
+              branch: branch
+            };
 
       - name: Slack通知
         uses: slackapi/slack-github-action@v1.26.0
@@ -46,7 +105,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ github.event.deployment.ref }}` | *環境:* ${{ github.event.deployment.environment }}\n🔗 *PR:* ${{ steps.get-pr.outputs.result && format('<{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || 'ブランチへの直接プッシュ' }}"
+                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ fromJSON(steps.get-pr.outputs.result).branch }}` | *環境:* ${{ github.event.deployment.environment }}${{ fromJSON(steps.get-pr.outputs.result).url && format('\n🔗 *PR:* <{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || '' }}"
                   }
                 },
                 {
@@ -66,7 +125,7 @@ jobs:
                         "type": "plain_text",
                         "text": "📱 GitHubで確認"
                       },
-                      "url": "${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).url || github.event.repository.html_url }}"
+                      "url": "${{ fromJSON(steps.get-pr.outputs.result).url || github.event.repository.html_url }}"
                     }
                   ]
                 }
