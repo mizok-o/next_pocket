@@ -66,7 +66,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ fromJSON(steps.get-pr.outputs.result).branch }}` | *環境:* ${{ github.event.deployment.environment }}\n🔗 *PR:* ${{ fromJSON(steps.get-pr.outputs.result).url && format('<{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || 'ブランチへの直接プッシュ' }}"
+                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ fromJSON(steps.get-pr.outputs.result).branch }}` | *環境:* ${{ github.event.deployment.environment }}${{ fromJSON(steps.get-pr.outputs.result).url && format('\n🔗 *PR:* <{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || '' }}"
                   }
                 },
                 {
