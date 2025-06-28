@@ -5,14 +5,14 @@ import {
   MILLISECONDS_MULTIPLIER,
   SPECIAL_URL_PREFIXES,
   STORAGE_KEYS,
-} from './constants.js';
+} from "./constants.js";
 
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   await checkCurrentTabUrl(activeInfo.tabId);
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url) {
+  if (changeInfo.status === "complete" && tab.url) {
     await checkCurrentTabUrl(tabId);
   }
 });
@@ -26,13 +26,13 @@ async function checkCurrentTabUrl(tabId) {
       tab.url.startsWith(SPECIAL_URL_PREFIXES.CHROME) ||
       tab.url.startsWith(SPECIAL_URL_PREFIXES.EXTENSION)
     ) {
-      chrome.action.setBadgeText({ text: '', tabId });
+      chrome.action.setBadgeText({ text: "", tabId });
       return;
     }
 
     const token = await getAuthToken();
     if (!token) {
-      chrome.action.setBadgeText({ text: '', tabId });
+      chrome.action.setBadgeText({ text: "", tabId });
       return;
     }
 
@@ -42,20 +42,21 @@ async function checkCurrentTabUrl(tabId) {
       chrome.action.setBadgeText({ text: BADGE.SAVED_TEXT, tabId });
       chrome.action.setBadgeBackgroundColor({ color: BADGE.SAVED_COLOR, tabId });
     } else {
-      chrome.action.setBadgeText({ text: '', tabId });
+      chrome.action.setBadgeText({ text: "", tabId });
     }
-  } catch {
-    chrome.action.setBadgeText({ text: '', tabId });
+  } catch (error) {
+    console.error("Chrome extension error:", error);
+    chrome.action.setBadgeText({ text: "", tabId });
   }
 }
 
 async function checkUrlExists(url, token) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/urls/check`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ url }),
     });
@@ -66,7 +67,8 @@ async function checkUrlExists(url, token) {
 
     const result = await response.json();
     return result.exists;
-  } catch {
+  } catch (error) {
+    console.error("Chrome extension URL check error:", error);
     return false;
   }
 }

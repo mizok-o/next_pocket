@@ -21,7 +21,11 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex items-center space-x-3">
-          <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
+          <div
+            className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
+            role="status"
+            aria-label="読み込み中"
+          />
           <span className="text-gray-600 font-medium">読み込み中...</span>
         </div>
       </div>
@@ -42,14 +46,14 @@ export default function Home() {
               <div className="relative">
                 <Image
                   src="/app-icon.png"
-                  alt="QuickMark"
+                  alt="Ato（あと）"
                   width={48}
                   height={48}
                   className="w-12 h-12 rounded-xl shadow-lg"
                 />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent tracking-tight">
-                QuickMark
+                Ato（あと）
               </h1>
             </div>
             <p className="text-slate-600 text-lg max-w-md mx-auto leading-relaxed">

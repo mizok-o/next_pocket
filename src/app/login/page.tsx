@@ -25,7 +25,11 @@ function LoginForm() {
   if (status === "loading") {
     return (
       <div className="flex items-center space-x-3">
-        <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
+        <div
+          className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
+          role="status"
+          aria-label="読み込み中"
+        />
         <span className="text-gray-600 font-medium">読み込み中...</span>
       </div>
     );
@@ -38,13 +42,13 @@ function LoginForm() {
   return (
     <div className="bg-white border border-gray-200 p-8 rounded-lg shadow-sm w-full max-w-md">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight mb-2">My Pocket</h1>
+        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight mb-2">Ato（あと）</h1>
         <p className="text-gray-600">アカウントにログイン</p>
       </div>
 
       {authError && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm text-center">{authError}</p>
+          <p className="text-red-500 text-sm mt-2 text-center">{authError}</p>
         </div>
       )}
 
@@ -86,7 +90,11 @@ export default function LoginPage() {
       <Suspense
         fallback={
           <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600" />
+            <div
+              className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
+              role="status"
+              aria-label="読み込み中"
+            />
             <span className="text-gray-600 font-medium">読み込み中...</span>
           </div>
         }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 import type { Url } from "@/types";
 
@@ -28,7 +29,9 @@ export default function BookmarkList() {
       const { data }: { data: Url[] } = await response.json();
       setUrls(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      Sentry.captureException(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -57,11 +60,13 @@ export default function BookmarkList() {
 
       setUrls(urls.filter((url) => url.id !== id));
       setOpenMenuId(null);
-    } catch {}
+    } catch (err) {
+      Sentry.captureException(err);
+    }
   };
 
-  const handleImageError = (id: number) => {
-    setImageErrors(prev => new Set(prev).add(id));
+  const handleImageError = (id: number): void => {
+    setImageErrors((prev) => new Set(prev).add(id));
   };
 
   useEffect(() => {
@@ -83,7 +88,11 @@ export default function BookmarkList() {
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500" />
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500"
+              role="status"
+              aria-label="読み込み中"
+            />
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 animate-pulse" />
           </div>
           <span className="text-slate-600 font-medium text-lg">読み込み中...</span>
@@ -113,8 +122,8 @@ export default function BookmarkList() {
               />
             </svg>
           </div>
-          <p className="text-red-800 mb-3 font-semibold text-lg">エラーが発生しました</p>
-          <p className="text-red-600/80 text-sm mb-8 leading-relaxed">{error}</p>
+          <p className="text-red-500 text-sm mt-2">エラーが発生しました</p>
+          <p className="text-red-500 text-sm mt-2">{error}</p>
           <button
             type="button"
             onClick={() => {
@@ -171,11 +180,11 @@ export default function BookmarkList() {
               {url.image_url && !imageErrors.has(url.id) ? (
                 <Image
                   src={url.image_url}
-                  alt={url.title || "OGP image"}
+                  alt={url.title ? `${url.title}のOGP画像` : "ブックマークサムネイル"}
                   fill
                   className="object-cover"
                   onError={() => handleImageError(url.id)}
-                  unoptimized
+                  unoptimized // 外部URL用の最適化を無効化
                 />
               ) : (
                 <div className="relative flex items-center justify-center w-full h-full">
@@ -248,7 +257,7 @@ export default function BookmarkList() {
                     <button
                       type="button"
                       onClick={(e) => handleDelete(url.id, e)}
-                      className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
+                      className="block w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
                     >
                       削除
                     </button>

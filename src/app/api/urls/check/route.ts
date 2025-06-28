@@ -1,5 +1,6 @@
 import { supabase } from "@/app/supabaseClient";
 import { getUserId } from "@/lib/supabaseServer";
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -32,7 +33,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ exists: data && data.length > 0 });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
 }

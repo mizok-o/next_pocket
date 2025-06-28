@@ -3,8 +3,8 @@ import "./globals.css";
 import Providers from "./Providers";
 
 export const metadata: Metadata = {
-  title: "QuickMark",
-  description: "素早く簡単にブックマークを管理",
+  title: "Ato（あと）",
+  description: "あとで読みたい、すべてを記録する - ブックマーク管理アプリ",
   icons: {
     icon: "/app-icon.png",
     shortcut: "/app-icon.png",
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
