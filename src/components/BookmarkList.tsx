@@ -1,5 +1,7 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import type { Url } from "@/types";
@@ -9,6 +11,7 @@ export default function BookmarkList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     fetchUrls();
@@ -26,7 +29,9 @@ export default function BookmarkList() {
       const { data }: { data: Url[] } = await response.json();
       setUrls(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      Sentry.captureException(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -55,21 +60,27 @@ export default function BookmarkList() {
 
       setUrls(urls.filter((url) => url.id !== id));
       setOpenMenuId(null);
-    } catch {}
+    } catch (err) {
+      Sentry.captureException(err);
+    }
+  };
+
+  const handleImageError = (id: number): void => {
+    setImageErrors((prev) => new Set(prev).add(id));
   };
 
   const toggleFavoriteStatusWithOptimisticUpdate = async (
-    bookmarkId: number, 
-    currentIsFavoriteStatus: boolean, 
+    bookmarkId: number,
+    currentIsFavoriteStatus: boolean,
     clickEvent: React.MouseEvent
   ) => {
     clickEvent.stopPropagation();
-    
+
     const updatedIsFavoriteStatus = !currentIsFavoriteStatus;
-    
+
     // IMMEDIATE UI UPDATE: Show new state instantly for better user experience
-    setUrls(previousUrls => 
-      previousUrls.map(bookmarkUrl => {
+    setUrls((previousUrls) =>
+      previousUrls.map((bookmarkUrl) => {
         if (bookmarkUrl.id === bookmarkId) {
           return { ...bookmarkUrl, is_favorite: updatedIsFavoriteStatus };
         }
@@ -92,15 +103,18 @@ export default function BookmarkList() {
       }
     } catch (syncError) {
       // ROLLBACK: Revert UI to original state if backend sync fails
-      setUrls(previousUrls => 
-        previousUrls.map(bookmarkUrl => {
-          if (bookmarkUrl.id === bookmarkId && bookmarkUrl.is_favorite === updatedIsFavoriteStatus) {
+      setUrls((previousUrls) =>
+        previousUrls.map((bookmarkUrl) => {
+          if (
+            bookmarkUrl.id === bookmarkId &&
+            bookmarkUrl.is_favorite === updatedIsFavoriteStatus
+          ) {
             return { ...bookmarkUrl, is_favorite: currentIsFavoriteStatus };
           }
           return bookmarkUrl;
         })
       );
-      console.error('Failed to sync favorite status:', syncError);
+      console.error("Failed to sync favorite status:", syncError);
     }
   };
 
@@ -123,7 +137,11 @@ export default function BookmarkList() {
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500" />
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500"
+              role="status"
+              aria-label="読み込み中"
+            />
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 animate-pulse" />
           </div>
           <span className="text-slate-600 font-medium text-lg">読み込み中...</span>
@@ -153,8 +171,8 @@ export default function BookmarkList() {
               />
             </svg>
           </div>
-          <p className="text-red-800 mb-3 font-semibold text-lg">エラーが発生しました</p>
-          <p className="text-red-600/80 text-sm mb-8 leading-relaxed">{error}</p>
+          <p className="text-red-500 text-sm mt-2">エラーが発生しました</p>
+          <p className="text-red-500 text-sm mt-2">{error}</p>
           <button
             type="button"
             onClick={() => {
@@ -201,13 +219,12 @@ export default function BookmarkList() {
   return (
     <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {urls.map((url) => (
-        <li key={url.id} className="contents">
-          <div
-            role="button"
-            tabIndex={0}
+        <li key={url.id}>
+          <button
+            type="button"
             onClick={() => window.open(url.url, "_blank")}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
+              if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 window.open(url.url, "_blank");
               }
@@ -217,15 +234,17 @@ export default function BookmarkList() {
             {/* Favorite star icon */}
             <button
               type="button"
-              onClick={(clickEvent) => toggleFavoriteStatusWithOptimisticUpdate(url.id, url.is_favorite, clickEvent)}
+              onClick={(clickEvent) =>
+                toggleFavoriteStatusWithOptimisticUpdate(url.id, url.is_favorite, clickEvent)
+              }
               className="absolute top-4 left-4 z-10 p-2 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm cursor-pointer"
               title={url.is_favorite ? "お気に入りから削除" : "お気に入りに追加"}
               aria-label={url.is_favorite ? "お気に入りから削除" : "お気に入りに追加"}
             >
               <svg
                 className={`w-4 h-4 transition-colors duration-200 ${
-                  url.is_favorite 
-                    ? "text-yellow-500 fill-yellow-500" 
+                  url.is_favorite
+                    ? "text-yellow-500 fill-yellow-500"
                     : "text-slate-400 hover:text-yellow-500"
                 }`}
                 fill={url.is_favorite ? "currentColor" : "none"}
@@ -242,26 +261,35 @@ export default function BookmarkList() {
                 />
               </svg>
             </button>
-
-            <figure className="aspect-w-16 aspect-h-9 relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 rounded-lg" />
-                <svg
-                  className="relative h-10 w-10 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  role="img"
-                  aria-label="No image"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
+            <figure className="relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80 overflow-hidden">
+              {url.image_url && !imageErrors.has(url.id) ? (
+                <Image
+                  src={url.image_url}
+                  alt={url.title ? `${url.title}のOGP画像` : "ブックマークサムネイル"}
+                  fill
+                  className="object-cover"
+                  onError={() => handleImageError(url.id)}
+                />
+              ) : (
+                <div className="relative flex items-center justify-center w-full h-full">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 rounded-lg" />
+                  <svg
+                    className="relative h-10 w-10 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    role="img"
+                    aria-label="No image"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+              )}
             </figure>
 
             <article className="p-6">
@@ -313,7 +341,7 @@ export default function BookmarkList() {
                     <button
                       type="button"
                       onClick={(e) => handleDelete(url.id, e)}
-                      className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
+                      className="block w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
                     >
                       削除
                     </button>
@@ -344,7 +372,7 @@ export default function BookmarkList() {
                 />
               </svg>
             </button>
-          </div>
+          </button>
         </li>
       ))}
     </ul>

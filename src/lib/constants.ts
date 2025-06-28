@@ -1,1 +1,1 @@
-export const JWT_EXPIRATION = '1d';
+export const JWT_EXPIRATION = "1d";
