@@ -130,9 +130,7 @@ jobs:
               'enhancement': ['feat', 'feature', 'improve', 'enhance', '機能', '改善', '追加'],
               'performance': ['perf', 'performance', 'speed', 'optimize', 'パフォーマンス', '最適化'],
               'security': ['security', 'auth', 'login', 'セキュリティ', '認証'],
-              'ui/ux': ['ui', 'ux', 'design', 'style', 'css', 'デザイン', 'スタイル'],
-              'breaking-change': ['breaking', 'major', '破壊的', 'BREAKING'],
-              'help-wanted': ['help', 'wanted', 'good first issue', 'ヘルプ', '初心者向け']
+              'ui/ux': ['ui', 'ux', 'design', 'style', 'css', 'デザイン', 'スタイル']
             };
 
             for (const [labelName, keywords] of Object.entries(keywordRules)) {

@@ -29,8 +29,6 @@ Issue/PRのタイトル・本文からキーワードを検出してラベルを
 | `performance` | perf, performance, speed, optimize, パフォーマンス, 最適化 |
 | `security` | security, auth, login, セキュリティ, 認証 |
 | `ui/ux` | ui, ux, design, style, css, デザイン, スタイル |
-| `breaking-change` | breaking, major, 破壊的, BREAKING |
-| `help-wanted` | help, wanted, good first issue, ヘルプ, 初心者向け |
 
 ## 使用方法
 
