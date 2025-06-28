@@ -1,0 +1,76 @@
+name: Vercel Deploy Notification
+
+on:
+  deployment_status:
+
+jobs:
+  notify-slack:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: PR情報とassignee取得
+        uses: actions/github-script@v7
+        id: get-pr
+        with:
+          script: |
+            const branch = context.payload.deployment.ref;
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+            
+            if (prs.data.length > 0) {
+              const pr = prs.data[0];
+              const assignees = pr.assignees ? pr.assignees.map(a => a.login) : [];
+              return {
+                number: pr.number,
+                title: pr.title,
+                url: pr.html_url,
+                assignees: assignees
+              };
+            }
+            return null;
+
+      - name: Slack通知
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": "🚀 Vercelデプロイが完了しました",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ github.event.deployment.ref }}` | *環境:* ${{ github.event.deployment.environment }}\n🔗 *PR:* ${{ steps.get-pr.outputs.result && format('<{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || 'ブランチへの直接プッシュ' }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🌐 サイトを確認"
+                      },
+                      "url": "${{ github.event.deployment_status.target_url }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "📱 GitHubで確認"
+                      },
+                      "url": "${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).url || github.event.repository.html_url }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
