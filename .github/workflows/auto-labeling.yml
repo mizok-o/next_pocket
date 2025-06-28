@@ -50,7 +50,7 @@ jobs:
                 description: 'Frontend related changes'
               },
               'backend': {
-                patterns: ['api/', 'lib/', '*.ts', '!*.tsx'],
+                patterns: ['api/', 'lib/', 'src/lib/', '*.ts', '!*.tsx', '!.github/'],
                 color: '8B5A2B',
                 description: 'Backend related changes'
               },
@@ -70,7 +70,7 @@ jobs:
                 description: 'Documentation changes'
               },
               'config': {
-                patterns: ['*.json', '*.yml', '*.yaml', '.env*', 'package*.json'],
+                patterns: ['*.json', '.env*', 'package*.json', 'tsconfig*.json', 'next.config*', 'tailwind.config*'],
                 color: 'F9D71C',
                 description: 'Configuration files'
               },
