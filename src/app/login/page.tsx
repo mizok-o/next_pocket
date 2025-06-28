@@ -42,7 +42,7 @@ function LoginForm() {
   return (
     <div className="bg-white border border-gray-200 p-8 rounded-lg shadow-sm w-full max-w-md">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight mb-2">My Pocket</h1>
+        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight mb-2">Ato（あと）</h1>
         <p className="text-gray-600">アカウントにログイン</p>
       </div>
 
