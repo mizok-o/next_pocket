@@ -1,9 +1,9 @@
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'プライバシーポリシー - Ato（あと）',
-  description: 'Ato（あと）Chrome拡張機能のプライバシーポリシーです。',
-}
+  title: "プライバシーポリシー - Ato（あと）",
+  description: "Ato（あと）Chrome拡張機能のプライバシーポリシーです。",
+};
 
 export default function PrivacyPolicy() {
   return (
@@ -24,9 +24,16 @@ export default function PrivacyPolicy() {
         <h2 className="text-2xl font-semibold mb-4">2. 収集する情報</h2>
         <p className="mb-3">本拡張機能は以下の情報を収集します：</p>
         <ul className="list-disc ml-6 space-y-2">
-          <li><strong>URL情報</strong>: ユーザーが保存を選択したウェブページのURL</li>
-          <li><strong>ページメタデータ</strong>: ページタイトル、説明文、OGP画像のURL</li>
-          <li><strong>認証情報</strong>: Ato（あと）サービスへのログインに必要な認証トークン（ローカルストレージに保存）</li>
+          <li>
+            <strong>URL情報</strong>: ユーザーが保存を選択したウェブページのURL
+          </li>
+          <li>
+            <strong>ページメタデータ</strong>: ページタイトル、説明文、OGP画像のURL
+          </li>
+          <li>
+            <strong>認証情報</strong>:
+            Ato（あと）サービスへのログインに必要な認証トークン（ローカルストレージに保存）
+          </li>
         </ul>
       </section>
 
@@ -68,7 +75,9 @@ export default function PrivacyPolicy() {
 
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">7. セキュリティ</h2>
-        <p className="mb-3">本拡張機能は、収集した情報を保護するため、適切なセキュリティ対策を実施しています：</p>
+        <p className="mb-3">
+          本拡張機能は、収集した情報を保護するため、適切なセキュリティ対策を実施しています：
+        </p>
         <ul className="list-disc ml-6 space-y-2">
           <li>HTTPS通信によるデータの暗号化</li>
           <li>最小限の権限のみを要求</li>
@@ -100,5 +109,5 @@ export default function PrivacyPolicy() {
         </p>
       </section>
     </div>
-  )
+  );
 }
