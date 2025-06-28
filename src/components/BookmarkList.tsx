@@ -69,6 +69,55 @@ export default function BookmarkList() {
     setImageErrors((prev) => new Set(prev).add(id));
   };
 
+  const toggleFavoriteStatusWithOptimisticUpdate = async (
+    bookmarkId: number,
+    currentIsFavoriteStatus: boolean,
+    clickEvent: React.MouseEvent
+  ) => {
+    clickEvent.stopPropagation();
+
+    const updatedIsFavoriteStatus = !currentIsFavoriteStatus;
+
+    // IMMEDIATE UI UPDATE: Show new state instantly for better user experience
+    setUrls((previousUrls) =>
+      previousUrls.map((bookmarkUrl) => {
+        if (bookmarkUrl.id === bookmarkId) {
+          return { ...bookmarkUrl, is_favorite: updatedIsFavoriteStatus };
+        }
+        return bookmarkUrl;
+      })
+    );
+
+    // BACKEND SYNC: Update database in background
+    try {
+      const favoriteUpdateResponse = await fetch(`/api/urls/${bookmarkId}/favorite`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ is_favorite: updatedIsFavoriteStatus }),
+      });
+
+      if (!favoriteUpdateResponse.ok) {
+        throw new Error("Failed to sync favorite status with server");
+      }
+    } catch (syncError) {
+      // ROLLBACK: Revert UI to original state if backend sync fails
+      setUrls((previousUrls) =>
+        previousUrls.map((bookmarkUrl) => {
+          if (
+            bookmarkUrl.id === bookmarkId &&
+            bookmarkUrl.is_favorite === updatedIsFavoriteStatus
+          ) {
+            return { ...bookmarkUrl, is_favorite: currentIsFavoriteStatus };
+          }
+          return bookmarkUrl;
+        })
+      );
+      console.error("Failed to sync favorite status:", syncError);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (openMenuId !== null) {
@@ -182,6 +231,36 @@ export default function BookmarkList() {
             }}
             className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden relative text-left w-full hover:-translate-y-1 cursor-pointer"
           >
+            {/* Favorite star icon */}
+            <button
+              type="button"
+              onClick={(clickEvent) =>
+                toggleFavoriteStatusWithOptimisticUpdate(url.id, url.is_favorite, clickEvent)
+              }
+              className="absolute top-4 left-4 z-10 p-2 bg-white/90 hover:bg-white border border-slate-200/60 rounded-xl shadow-lg shadow-slate-500/10 hover:shadow-slate-500/20 transition-all duration-200 backdrop-blur-sm cursor-pointer"
+              title={url.is_favorite ? "お気に入りから削除" : "お気に入りに追加"}
+              aria-label={url.is_favorite ? "お気に入りから削除" : "お気に入りに追加"}
+            >
+              <svg
+                className={`w-4 h-4 transition-colors duration-200 ${
+                  url.is_favorite
+                    ? "text-yellow-500 fill-yellow-500"
+                    : "text-slate-400 hover:text-yellow-500"
+                }`}
+                fill={url.is_favorite ? "currentColor" : "none"}
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                role="img"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                />
+              </svg>
+            </button>
             <figure className="relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80 overflow-hidden">
               {url.image_url && !imageErrors.has(url.id) ? (
                 <Image
