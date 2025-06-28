@@ -15,35 +15,74 @@ jobs:
         with:
           script: |
             const branch = context.payload.deployment.ref;
+            const sha = context.payload.deployment.sha;
             
-            // まずopenなPRを検索
-            let prs = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: `${context.repo.owner}:${branch}`,
-              state: 'open'
-            });
-            
-            // openなPRがない場合、closedも検索
-            if (prs.data.length === 0) {
-              prs = await github.rest.pulls.list({
+            try {
+              // Step 1: コミットSHAから関連PRを検索
+              const commitPRs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: sha
+              });
+              
+              if (commitPRs.data.length > 0) {
+                const pr = commitPRs.data[0];
+                return {
+                  number: pr.number,
+                  title: pr.title,
+                  url: pr.html_url,
+                  branch: branch
+                };
+              }
+              
+              // Step 2: コミットメッセージからPR番号を抽出
+              const commit = await github.rest.git.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: sha
+              });
+              
+              const commitMessage = commit.data.message;
+              const prMatch = commitMessage.match(/Merge pull request #(\d+)|#(\d+)/);
+              
+              if (prMatch) {
+                const prNumber = prMatch[1] || prMatch[2];
+                const pr = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: parseInt(prNumber)
+                });
+                
+                return {
+                  number: pr.data.number,
+                  title: pr.data.title,
+                  url: pr.data.html_url,
+                  branch: branch
+                };
+              }
+              
+              // Step 3: フォールバック - ブランチから検索
+              const prs = await github.rest.pulls.list({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 head: `${context.repo.owner}:${branch}`,
-                state: 'closed',
+                state: 'all',
                 sort: 'updated',
                 direction: 'desc'
               });
-            }
-            
-            if (prs.data.length > 0) {
-              const pr = prs.data[0];
-              return {
-                number: pr.number,
-                title: pr.title,
-                url: pr.html_url,
-                branch: branch
-              };
+              
+              if (prs.data.length > 0) {
+                const pr = prs.data[0];
+                return {
+                  number: pr.number,
+                  title: pr.title,
+                  url: pr.html_url,
+                  branch: branch
+                };
+              }
+              
+            } catch (error) {
+              console.log('PR検索エラー:', error.message);
             }
             
             // PRが見つからない場合でもブランチ情報は返す
