@@ -50,29 +50,14 @@ jobs:
                 description: 'Frontend related changes'
               },
               'backend': {
-                patterns: ['api/', 'lib/', 'src/lib/', '*.ts', '!*.tsx', '!.github/'],
+                patterns: ['api/', 'lib/', '*.ts'],
                 color: '8B5A2B',
                 description: 'Backend related changes'
-              },
-              'database': {
-                patterns: ['prisma/', 'migrations/', '*.sql', '*.prisma'],
-                color: 'D93F0B',
-                description: 'Database related changes'
               },
               'chrome-extension': {
                 patterns: ['chrome-extension/'],
                 color: '4285F4',
                 description: 'Chrome extension related changes'
-              },
-              'docs': {
-                patterns: ['*.md', 'docs/', 'README*'],
-                color: '0052CC',
-                description: 'Documentation changes'
-              },
-              'config': {
-                patterns: ['*.json', '.env*', 'package*.json', 'tsconfig*.json', 'next.config*', 'tailwind.config*'],
-                color: 'F9D71C',
-                description: 'Configuration files'
               },
               'github': {
                 patterns: ['.github/'],
@@ -80,7 +65,7 @@ jobs:
                 description: 'GitHub Actions and workflows'
               },
               'dependencies': {
-                patterns: ['package.json', 'package-lock.json', 'yarn.lock'],
+                patterns: ['package.json', 'package-lock.json'],
                 color: 'E99695',
                 description: 'Dependency updates'
               }
@@ -95,15 +80,6 @@ jobs:
               
               for (const [labelName, rule] of Object.entries(labelRules)) {
                 const shouldAddLabel = rule.patterns.some(pattern => {
-                  if (pattern.startsWith('!')) {
-                    // 除外パターン
-                    const excludePattern = pattern.slice(1);
-                    return !files.some(file => 
-                      file.includes(excludePattern) || 
-                      file.endsWith(excludePattern.replace('*', ''))
-                    );
-                  }
-                  
                   if (pattern.includes('*')) {
                     // ワイルドカードパターン
                     const extension = pattern.replace('*', '');
