@@ -23,5 +23,8 @@
     "16": "app-icon.png",
     "48": "app-icon.png",
     "128": "app-icon.png"
+  },
+  "privacy_policy": {
+    "url": "https://next-pocket-five.vercel.app/privacy-policy"
   }
 }
