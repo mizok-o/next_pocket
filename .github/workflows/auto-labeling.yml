@@ -1,0 +1,201 @@
+name: Auto Labeling
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issues:
+    types: [opened, reopened]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name == 'pull_request'
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **/*.{ts,tsx,js,jsx}
+            **/*.{yml,yaml,json}
+            **/*.{md,txt}
+            **/*.{sql,prisma}
+            chrome-extension/**
+            .github/**
+            api/**
+            app/**
+            components/**
+            lib/**
+            prisma/**
+            docs/**
+
+      - name: Apply labels based on file changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labelRules = {
+              'frontend': {
+                patterns: ['app/', 'components/', '*.tsx', '*.jsx'],
+                color: '0E7A8D',
+                description: 'Frontend related changes'
+              },
+              'backend': {
+                patterns: ['api/', 'lib/', '*.ts', '!*.tsx'],
+                color: '8B5A2B',
+                description: 'Backend related changes'
+              },
+              'database': {
+                patterns: ['prisma/', 'migrations/', '*.sql', '*.prisma'],
+                color: 'D93F0B',
+                description: 'Database related changes'
+              },
+              'chrome-extension': {
+                patterns: ['chrome-extension/'],
+                color: '4285F4',
+                description: 'Chrome extension related changes'
+              },
+              'docs': {
+                patterns: ['*.md', 'docs/', 'README*'],
+                color: '0052CC',
+                description: 'Documentation changes'
+              },
+              'config': {
+                patterns: ['*.json', '*.yml', '*.yaml', '.env*', 'package*.json'],
+                color: 'F9D71C',
+                description: 'Configuration files'
+              },
+              'github': {
+                patterns: ['.github/'],
+                color: '7057FF',
+                description: 'GitHub Actions and workflows'
+              },
+              'dependencies': {
+                patterns: ['package.json', 'package-lock.json', 'yarn.lock'],
+                color: 'E99695',
+                description: 'Dependency updates'
+              }
+            };
+
+            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}';
+            const labelsToAdd = new Set();
+
+            // PRの場合のみファイル変更ベースでラベリング
+            if (context.eventName === 'pull_request' && changedFiles) {
+              const files = changedFiles.split(' ');
+              
+              for (const [labelName, rule] of Object.entries(labelRules)) {
+                const shouldAddLabel = rule.patterns.some(pattern => {
+                  if (pattern.startsWith('!')) {
+                    // 除外パターン
+                    const excludePattern = pattern.slice(1);
+                    return !files.some(file => 
+                      file.includes(excludePattern) || 
+                      file.endsWith(excludePattern.replace('*', ''))
+                    );
+                  }
+                  
+                  if (pattern.includes('*')) {
+                    // ワイルドカードパターン
+                    const extension = pattern.replace('*', '');
+                    return files.some(file => file.endsWith(extension));
+                  }
+                  
+                  // ディレクトリパターン
+                  return files.some(file => file.includes(pattern));
+                });
+                
+                if (shouldAddLabel) {
+                  labelsToAdd.add(labelName);
+                }
+              }
+            }
+
+            // Issue/PRのタイトルと本文からキーワードベースでラベリング
+            const title = context.payload.pull_request?.title || context.payload.issue?.title || '';
+            const body = context.payload.pull_request?.body || context.payload.issue?.body || '';
+            const text = (title + ' ' + body).toLowerCase();
+
+            const keywordRules = {
+              'bug': ['bug', 'fix', 'error', 'issue', '修正', 'エラー', 'バグ'],
+              'enhancement': ['feat', 'feature', 'improve', 'enhance', '機能', '改善', '追加'],
+              'performance': ['perf', 'performance', 'speed', 'optimize', 'パフォーマンス', '最適化'],
+              'security': ['security', 'auth', 'login', 'セキュリティ', '認証'],
+              'ui/ux': ['ui', 'ux', 'design', 'style', 'css', 'デザイン', 'スタイル'],
+              'breaking-change': ['breaking', 'major', '破壊的', 'BREAKING'],
+              'help-wanted': ['help', 'wanted', 'good first issue', 'ヘルプ', '初心者向け']
+            };
+
+            for (const [labelName, keywords] of Object.entries(keywordRules)) {
+              if (keywords.some(keyword => text.includes(keyword))) {
+                labelsToAdd.add(labelName);
+              }
+            }
+
+            // 既存のラベルを取得
+            const { data: existingLabels } = await github.rest.issues.listLabelsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existingLabelNames = existingLabels.map(label => label.name);
+
+            // 必要なラベルを作成
+            for (const [labelName, rule] of Object.entries(labelRules)) {
+              if (labelsToAdd.has(labelName) && !existingLabelNames.includes(labelName)) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelName,
+                    color: rule.color,
+                    description: rule.description
+                  });
+                  console.log(`Created label: ${labelName}`);
+                } catch (error) {
+                  console.log(`Label ${labelName} already exists or failed to create`);
+                }
+              }
+            }
+
+            // キーワードベースのラベルも作成
+            for (const labelName of Object.keys(keywordRules)) {
+              if (labelsToAdd.has(labelName) && !existingLabelNames.includes(labelName)) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelName,
+                    color: 'CCCCCC',
+                    description: `Auto-generated label for ${labelName}`
+                  });
+                } catch (error) {
+                  console.log(`Label ${labelName} already exists or failed to create`);
+                }
+              }
+            }
+
+            // ラベルを適用
+            if (labelsToAdd.size > 0) {
+              const issueNumber = context.payload.pull_request?.number || context.payload.issue?.number;
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: Array.from(labelsToAdd)
+              });
+              
+              console.log(`Applied labels: ${Array.from(labelsToAdd).join(', ')}`);
+            } else {
+              console.log('No labels to apply');
+            }
