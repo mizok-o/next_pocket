@@ -1,0 +1,31 @@
+My Pocket - Simple and Fast Bookmark Manager
+
+【Overview】
+My Pocket is a simple bookmark management extension that allows you to save web pages with just one click. Save interesting pages instantly and read them later at your leisure.
+
+【Key Features】
+✓ One-click page saving
+✓ Automatic capture of page title, description, and images
+✓ Organize with tags
+✓ Fast save processing
+✓ View saved list even offline
+
+【How to Use】
+1. Click the extension icon on the page you want to save
+2. Add tags as needed
+3. Click the "Save" button
+
+【Perfect for】
+• Those who want to quickly save articles to read later
+• Users who want to organize and manage bookmarks
+• People looking for simple and easy-to-use tools
+• Anyone who needs sync across multiple devices
+
+【Privacy and Security】
+• Requires only minimal permissions
+• Secure communication via HTTPS
+• Does not collect browsing history
+
+【Support】
+For questions or bug reports, please visit our GitHub Issues page:
+https://github.com/mizok-o/next_pocket/issues
