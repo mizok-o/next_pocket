@@ -15,9 +15,7 @@ const archive = archiver('zip', {
 });
 
 output.on('close', () => {
-  console.log(`✅ Extension packaged successfully!`);
-  console.log(`📦 File: ${outputFile}`);
-  console.log(`📏 Size: ${(archive.pointer() / 1024).toFixed(2)} KB`);
+  // Extension packaged successfully
 });
 
 archive.on('error', (err) => {
@@ -50,9 +48,6 @@ filesToInclude.forEach(file => {
   const filePath = path.join(__dirname, file);
   if (fs.existsSync(filePath)) {
     archive.file(filePath, { name: file });
-    console.log(`📄 Adding: ${file}`);
-  } else {
-    console.warn(`⚠️  File not found: ${file}`);
   }
 });
 

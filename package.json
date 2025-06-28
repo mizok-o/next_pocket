@@ -13,7 +13,6 @@
     "type-check": "npx tsc --noEmit",
     "prepare": "husky",
     "extension:build": "node chrome-extension/build.js dev",
-    "extension:build:dev": "node chrome-extension/build.js dev",
     "extension:build:prod": "node chrome-extension/build.js prod",
     "extension:package": "node chrome-extension/package.js",
     "biome": "biome check",
