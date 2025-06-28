@@ -25,7 +25,7 @@
     "**/*.{json,css}": "biome check --write"
   },
   "dependencies": {
-    "@sentry/nextjs": "^9.30.0",
+    "@sentry/nextjs": "^9.33.0",
     "@supabase/supabase-js": "^2.49.8",
     "bcryptjs": "^3.0.2",
     "lightningcss": "^1.30.1",
