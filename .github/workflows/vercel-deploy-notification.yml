@@ -15,24 +15,44 @@ jobs:
         with:
           script: |
             const branch = context.payload.deployment.ref;
-            const prs = await github.rest.pulls.list({
+            
+            // まずopenなPRを検索
+            let prs = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: `${context.repo.owner}:${branch}`,
               state: 'open'
             });
             
+            // openなPRがない場合、closedも検索
+            if (prs.data.length === 0) {
+              prs = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${context.repo.owner}:${branch}`,
+                state: 'closed',
+                sort: 'updated',
+                direction: 'desc'
+              });
+            }
+            
             if (prs.data.length > 0) {
               const pr = prs.data[0];
-              const assignees = pr.assignees ? pr.assignees.map(a => a.login) : [];
               return {
                 number: pr.number,
                 title: pr.title,
                 url: pr.html_url,
-                assignees: assignees
+                branch: branch
               };
             }
-            return null;
+            
+            // PRが見つからない場合でもブランチ情報は返す
+            return {
+              number: null,
+              title: null,
+              url: null,
+              branch: branch
+            };
 
       - name: Slack通知
         uses: slackapi/slack-github-action@v1.26.0
@@ -46,7 +66,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ github.event.deployment.ref }}` | *環境:* ${{ github.event.deployment.environment }}\n🔗 *PR:* ${{ steps.get-pr.outputs.result && format('<{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || 'ブランチへの直接プッシュ' }}"
+                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ fromJSON(steps.get-pr.outputs.result).branch }}` | *環境:* ${{ github.event.deployment.environment }}\n🔗 *PR:* ${{ fromJSON(steps.get-pr.outputs.result).url && format('<{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || 'ブランチへの直接プッシュ' }}"
                   }
                 },
                 {
@@ -66,7 +86,7 @@ jobs:
                         "type": "plain_text",
                         "text": "📱 GitHubで確認"
                       },
-                      "url": "${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).url || github.event.repository.html_url }}"
+                      "url": "${{ fromJSON(steps.get-pr.outputs.result).url || github.event.repository.html_url }}"
                     }
                   ]
                 }
