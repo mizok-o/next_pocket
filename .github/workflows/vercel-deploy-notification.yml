@@ -46,29 +46,8 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*🚀 Vercelデプロイが完了しました*\n${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).assignees[0] && format('<@{0}>', fromJSON(steps.get-pr.outputs.result).assignees[0]) || '<!channel>' }} デプロイが正常に完了しました"
+                    "text": "*🚀 Vercelデプロイが完了しました*\n<!channel>\n\n📋 *ブランチ:* `${{ github.event.deployment.ref }}` | *環境:* ${{ github.event.deployment.environment }}\n🔗 *PR:* ${{ steps.get-pr.outputs.result && format('<{0}|#{1} {2}>', fromJSON(steps.get-pr.outputs.result).url, fromJSON(steps.get-pr.outputs.result).number, fromJSON(steps.get-pr.outputs.result).title) || 'ブランチへの直接プッシュ' }}"
                   }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*対象ブランチ:*\n`${{ github.event.deployment.ref }}`"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*デプロイ環境:*\n${{ github.event.deployment.environment }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*関連PR:*\n${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).title || 'ブランチへの直接プッシュ' }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*プレビューURL:*\n<${{ github.event.deployment_status.target_url }}|サイトを確認>"
-                    }
-                  ]
                 },
                 {
                   "type": "actions",
@@ -77,7 +56,15 @@ jobs:
                       "type": "button",
                       "text": {
                         "type": "plain_text",
-                        "text": "GitHubで確認"
+                        "text": "🌐 サイトを確認"
+                      },
+                      "url": "${{ github.event.deployment_status.target_url }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "📱 GitHubで確認"
                       },
                       "url": "${{ steps.get-pr.outputs.result && fromJSON(steps.get-pr.outputs.result).url || github.event.repository.html_url }}"
                     }
