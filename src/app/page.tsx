@@ -46,14 +46,14 @@ export default function Home() {
               <div className="relative">
                 <Image
                   src="/app-icon.png"
-                  alt="QuickMark"
+                  alt="Ato（あと）"
                   width={48}
                   height={48}
                   className="w-12 h-12 rounded-xl shadow-lg"
                 />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent tracking-tight">
-                QuickMark
+                Ato（あと）
               </h1>
             </div>
             <p className="text-slate-600 text-lg max-w-md mx-auto leading-relaxed">

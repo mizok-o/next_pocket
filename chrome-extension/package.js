@@ -3,7 +3,7 @@ const path = require('path');
 const archiver = require('archiver');
 
 const outputDir = path.join(__dirname, 'dist');
-const outputFile = path.join(outputDir, 'my-pocket-extension.zip');
+const outputFile = path.join(outputDir, 'ato-extension.zip');
 
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir);

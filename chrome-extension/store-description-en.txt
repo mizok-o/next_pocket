@@ -1,7 +1,7 @@
-My Pocket - Simple and Fast Bookmark Manager
+Ato（あと）- Save Everything to Read Later
 
 【Overview】
-My Pocket is a simple bookmark management extension that allows you to save web pages with just one click. Save interesting pages instantly and read them later at your leisure.
+Ato（あと）is a simple bookmark management extension that allows you to save web pages with just one click. Save interesting pages instantly and read them later at your leisure.
 
 【Key Features】
 ✓ One-click page saving

@@ -42,9 +42,9 @@ const config = getManifestConfig();
 
 const manifestContent = {
   manifest_version: 3,
-  name: "My Pocket",
+  name: "Ato（あと）",
   version: "1.0.0",
-  description: "Save bookmarks to My Pocket",
+  description: "あとで読みたい、すべてを記録する",
   permissions: ["activeTab", "storage", "notifications", "scripting", "tabs"],
   host_permissions: config.host_permissions,
   background: {
@@ -58,7 +58,7 @@ const manifestContent = {
     },
   ],
   action: {
-    default_title: "Save to My Pocket",
+    default_title: "Atoに保存",
     default_popup: "popup.html",
   },
   icons: {
