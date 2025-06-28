@@ -170,13 +170,13 @@ export default function BookmarkList() {
   return (
     <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {urls.map((url) => (
-        <li key={url.id} className="contents">
+        <li key={url.id}>
           <button
             type="button"
             onClick={() => window.open(url.url, "_blank")}
             className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl hover:border-blue-300/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden relative text-left w-full hover:-translate-y-1 cursor-pointer"
           >
-            <figure className="aspect-w-16 aspect-h-9 relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80 overflow-hidden">
+            <figure className="relative h-36 bg-gradient-to-br from-slate-50 to-blue-50/30 flex items-center justify-center border-b border-slate-100/80 overflow-hidden">
               {url.image_url && !imageErrors.has(url.id) ? (
                 <Image
                   src={url.image_url}
@@ -184,7 +184,6 @@ export default function BookmarkList() {
                   fill
                   className="object-cover"
                   onError={() => handleImageError(url.id)}
-                  unoptimized // 外部URL用の最適化を無効化
                 />
               ) : (
                 <div className="relative flex items-center justify-center w-full h-full">
