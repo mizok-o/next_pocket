@@ -48,3 +48,6 @@ chrome-extension/dist/
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Private seed files
+supabase/seed/update-user2-email.sql
