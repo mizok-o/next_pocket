@@ -1,31 +1,66 @@
 import type { Url } from "@/types";
 import * as Sentry from "@sentry/nextjs";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+interface PaginationResponse {
+  data: Url[];
+  pagination: {
+    page: number;
+    limit: number;
+  };
+}
 
 export const useBookmarks = () => {
   const [urls, setUrls] = useState<Url[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchUrls = useCallback(async () => {
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  const fetchUrls = useCallback(async (page: number, isInitial = false) => {
     try {
-      const response = await fetch("/api/urls");
+      if (isInitial) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const response = await fetch(`/api/urls?page=${page}&limit=50`);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || "Failed to fetch URLs");
       }
 
-      const { data }: { data: Url[] } = await response.json();
-      setUrls(data || []);
+      const result: PaginationResponse = await response.json();
+      const newUrls = result.data || [];
+
+      if (isInitial) {
+        setUrls(newUrls);
+      } else {
+        setUrls((prev) => [...prev, ...newUrls]);
+      }
+
+      setHasMore(newUrls.length === 50);
+      setCurrentPage(page);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred";
       Sentry.captureException(err);
       setError(errorMessage);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
+
+  const loadMore = useCallback(() => {
+    if (!loadingMore && hasMore) {
+      fetchUrls(currentPage + 1);
+    }
+  }, [fetchUrls, currentPage, loadingMore, hasMore]);
 
   const deleteBookmark = useCallback(
     async (id: number) => {
@@ -66,7 +101,7 @@ export const useBookmarks = () => {
         throw new Error("Failed to update favorite status");
       }
 
-      fetchUrls();
+      fetchUrls(1, true);
     } catch (error) {
       Sentry.captureException(error);
       console.error("Failed to toggle favorite:", error);
@@ -75,20 +110,53 @@ export const useBookmarks = () => {
 
   const refetch = () => {
     setError(null);
-    setLoading(true);
-    fetchUrls();
+    setUrls([]);
+    setCurrentPage(1);
+    setHasMore(true);
+    fetchUrls(1, true);
   };
 
   useEffect(() => {
-    fetchUrls();
-  }, [fetchUrls]);
+    const timer = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            loadMore();
+          }
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "20px",
+        }
+      );
+
+      const currentTarget = observerTarget.current;
+
+      if (currentTarget) {
+        observer.observe(currentTarget);
+      }
+
+      return () => {
+        if (currentTarget) {
+          observer.unobserve(currentTarget);
+        }
+      };
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [loadMore]);
 
   return {
     urls,
     loading,
+    loadingMore,
     error,
+    hasMore,
     deleteBookmark,
     toggleFavorite,
     refetch,
+    observerTarget,
   };
 };

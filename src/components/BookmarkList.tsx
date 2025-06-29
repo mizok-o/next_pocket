@@ -9,7 +9,17 @@ import { LoadingState } from "@/components/LoadingState";
 import { useBookmarks } from "@/hooks/useBookmarks";
 
 export default function BookmarkList() {
-  const { urls, loading, error, deleteBookmark, toggleFavorite, refetch } = useBookmarks();
+  const {
+    urls,
+    loading,
+    loadingMore,
+    error,
+    hasMore,
+    deleteBookmark,
+    toggleFavorite,
+    refetch,
+    observerTarget,
+  } = useBookmarks();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const handleMenuClick = (id: number, e: React.MouseEvent) => {
@@ -59,18 +69,37 @@ export default function BookmarkList() {
   }
 
   return (
-    <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {urls.map((url) => (
-        <li key={url.id}>
-          <BookmarkCard
-            url={url}
-            onDelete={handleDelete}
-            onToggleFavorite={handleToggleFavorite}
-            openMenuId={openMenuId}
-            onMenuClick={handleMenuClick}
-          />
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {urls.map((url) => (
+          <li key={url.id}>
+            <BookmarkCard
+              url={url}
+              onDelete={handleDelete}
+              onToggleFavorite={handleToggleFavorite}
+              openMenuId={openMenuId}
+              onMenuClick={handleMenuClick}
+            />
+          </li>
+        ))}
+      </ul>
+
+      {hasMore && (
+        <div ref={observerTarget} className="flex justify-center py-8">
+          {loadingMore && (
+            <div className="flex items-center gap-2 text-gray-600">
+              <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full" />
+              <span>読み込み中...</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!hasMore && urls.length > 0 && (
+        <div className="flex justify-center py-8 text-gray-500">
+          すべてのブックマークを読み込みました
+        </div>
+      )}
+    </>
   );
 }
