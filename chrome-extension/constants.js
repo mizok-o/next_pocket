@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://next-pocket-five.vercel.app";
+export const API_BASE_URL = "http://localhost:3000";
 
 export const SPECIAL_URL_PREFIXES = {
   CHROME: "chrome://",
@@ -30,5 +30,5 @@ export const TIMEOUTS = {
 export const META_SELECTORS = {
   DESCRIPTION: 'meta[name="description"]',
   OG_DESCRIPTION: 'meta[property="og:description"]',
-  OG_IMAGE: 'meta[property="og:image"], meta[name="og:image"]',
+  OG_IMAGE: 'meta[property="og:image"]',
 };
