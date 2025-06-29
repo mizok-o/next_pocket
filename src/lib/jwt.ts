@@ -1,7 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { JWT_EXPIRATION } from "./constants";
 
-const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+const secretString = process.env.NEXTAUTH_SECRET || "fallback-secret-for-testing";
+const secret = new TextEncoder().encode(secretString);
 
 export async function generateJWT(userId: string): Promise<string> {
   const token = await new SignJWT({ userId })
