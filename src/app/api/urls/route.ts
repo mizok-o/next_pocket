@@ -18,6 +18,7 @@ export async function GET(request: Request) {
       .select("*")
       .eq("user_id", Number.parseInt(userId, 10))
       .is("deleted_at", null)
+      .order("is_favorite", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (error) {
