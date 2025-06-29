@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Chrome extension build output
 chrome-extension/dist/
+
+# Sentry Config File
+.env.sentry-build-plugin

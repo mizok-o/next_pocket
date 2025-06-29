@@ -42,15 +42,15 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
+  org: "mizo-t1",
+  project: "next_pocket",
+  authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-  sourcemaps: {
-    disable: true,
-  },
+  tunnelRoute: "/monitoring",
   disableLogger: true,
+  automaticVercelMonitors: true,
+  sourcemaps: {
+    disable: process.env.NODE_ENV !== "production",
+  },
 });
