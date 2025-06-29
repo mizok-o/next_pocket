@@ -1,4 +1,7 @@
 interface CsvDownloadButtonProps {
+  data?: unknown[];
+  filename?: string;
+  headers?: Record<string, string>;
   buttonText?: string;
 }
 
