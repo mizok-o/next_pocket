@@ -1,11 +1,14 @@
 import { ErrorIcon } from "@/components/icons";
 
 interface ErrorStateProps {
-  error: string;
-  onRetry: () => void;
+  error?: string;
+  onRetry?: () => void;
 }
 
-export const ErrorState = ({ error, onRetry }: ErrorStateProps) => (
+export const ErrorState = ({
+  error = "データの読み込みに失敗しました",
+  onRetry = () => window.location.reload(),
+}: ErrorStateProps) => (
   <div className="max-w-md mx-auto text-center p-8">
     <div className="bg-gradient-to-br from-red-50/80 to-rose-50/60 border border-red-200/60 rounded-2xl p-8 backdrop-blur-sm shadow-lg shadow-red-500/5">
       <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/25">

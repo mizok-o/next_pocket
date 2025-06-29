@@ -1,7 +1,7 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
-import ErrorState from "./ErrorState";
+import { ErrorState } from "../ErrorState";
 
 interface Props {
   children: ReactNode;

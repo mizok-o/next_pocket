@@ -1,32 +1,26 @@
+"use client";
+
 import CsvDownloadButton from "@/components/common/CsvDownloadButton";
 import type { UserMonthlyBookmark } from "@/types/dashboard";
+import { use } from "react";
 
-async function fetchUsersAction(): Promise<UserMonthlyBookmark[]> {
+async function fetchUserMonthlyData() {
   const response = await fetch("/api/dashboard/users/monthly");
-  const result = await response.json();
   if (!response.ok) {
-    throw new Error(result.error || "Failed to fetch users data");
+    throw new Error(response.statusText);
   }
-  return result.userMonthlyBookmarks || [];
+  const data = await response.json();
+  return data.userMonthlyBookmarks || [];
 }
 
-export default async function UserBookmarkTable() {
-  const users = await fetchUsersAction();
+export default function UserBookmarkTable() {
+  const users = use(fetchUserMonthlyData());
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-900">今月のユーザー別ブックマーク数</h2>
-        <CsvDownloadButton
-          data={users}
-          filename="user_monthly_bookmarks"
-          headers={{
-            userId: "ユーザー名",
-            bookmarkCount: "ブックマーク数",
-            createdAt: "最終アクティブ",
-          }}
-          buttonText="CSVダウンロード"
-        />
+        <CsvDownloadButton />
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
@@ -44,7 +38,7 @@ export default async function UserBookmarkTable() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {users.map((user: UserMonthlyBookmark) => (
               <tr key={user.userId} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{user.userId}</div>

@@ -1,18 +1,17 @@
-import type { KPICardData } from "@/types/dashboard";
+"use client";
 
-async function fetchKPIData(): Promise<KPICardData> {
-  const response = await fetch("/api/dashboard/kpi", {
-    cache: "no-store",
-  });
-  const result = await response.json();
+import { use } from "react";
+
+async function fetchKPIData() {
+  const response = await fetch("/api/dashboard/kpi", { cache: "no-store" });
   if (!response.ok) {
-    throw new Error(result.error || "Failed to fetch KPI data");
+    throw new Error(response.statusText);
   }
-  return result;
+  return response.json();
 }
 
-export default async function KPICards() {
-  const kpiData = await fetchKPIData();
+export default function KPICards() {
+  const kpiData = use(fetchKPIData());
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

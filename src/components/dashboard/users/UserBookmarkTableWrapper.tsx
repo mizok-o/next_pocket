@@ -4,7 +4,7 @@ import UserBookmarkTable from "./UserBookmarkTable";
 
 export default function UserBookmarkTableWrapper() {
   return (
-    <Suspense fallback={<TableSkeleton rows={5} columns={3} hasActions={true} />}>
+    <Suspense fallback={<TableSkeleton rows={5} columns={3} hasActions />}>
       <UserBookmarkTable />
     </Suspense>
   );
