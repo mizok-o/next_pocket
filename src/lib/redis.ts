@@ -31,7 +31,7 @@ export function getRedisClient(): Redis | null {
   return redis;
 }
 
-export async function setCache(key: string, value: any, ttlSeconds = 300): Promise<boolean> {
+export async function setCache(key: string, value: unknown, ttlSeconds = 300): Promise<boolean> {
   const client = getRedisClient();
   if (!client) return false;
 
