@@ -30,5 +30,5 @@ export const TIMEOUTS = {
 export const META_SELECTORS = {
   DESCRIPTION: 'meta[name="description"]',
   OG_DESCRIPTION: 'meta[property="og:description"]',
-  OG_IMAGE: 'meta[property="og:image"]',
+  OG_IMAGE: 'meta[property="og:image"], meta[name="og:image"]',
 };
