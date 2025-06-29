@@ -43,42 +43,48 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const labelRules = {
-              'frontend': {
+            const labelRules = [
+              {
+                name: 'backend',
+                patterns: ['app/api/', 'api/', 'lib/', '*.ts'],
+                color: '8B5A2B',
+                description: 'Backend related changes'
+              },
+              {
+                name: 'frontend',
                 patterns: ['app/', 'components/', '*.tsx', '*.jsx'],
                 color: '0E7A8D',
                 description: 'Frontend related changes'
               },
-              'backend': {
-                patterns: ['api/', 'lib/', '*.ts'],
-                color: '8B5A2B',
-                description: 'Backend related changes'
-              },
-              'chrome-extension': {
+              {
+                name: 'chrome-extension',
                 patterns: ['chrome-extension/'],
                 color: '4285F4',
                 description: 'Chrome extension related changes'
               },
-              'github': {
+              {
+                name: 'github',
                 patterns: ['.github/'],
                 color: '7057FF',
                 description: 'GitHub Actions and workflows'
               },
-              'dependencies': {
+              {
+                name: 'dependencies',
                 patterns: ['package.json', 'package-lock.json'],
                 color: 'E99695',
                 description: 'Dependency updates'
               }
-            };
+            ];
 
             const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}';
             const labelsToAdd = new Set();
 
-            // PRの場合のみファイル変更ベースでラベリング
+            // PRの場合のみファイル変更ベースでラベリング（優先順位付き）
             if (context.eventName === 'pull_request' && changedFiles) {
               const files = changedFiles.split(' ');
               
-              for (const [labelName, rule] of Object.entries(labelRules)) {
+              // 優先順位順にチェックし、最初にマッチしたラベルのみ追加
+              for (const rule of labelRules) {
                 const shouldAddLabel = rule.patterns.some(pattern => {
                   if (pattern.includes('*')) {
                     // ワイルドカードパターン
@@ -91,7 +97,8 @@ jobs:
                 });
                 
                 if (shouldAddLabel) {
-                  labelsToAdd.add(labelName);
+                  labelsToAdd.add(rule.name);
+                  break; // 最初にマッチしたラベルで終了
                 }
               }
             }
@@ -103,9 +110,6 @@ jobs:
 
             const keywordRules = {
               'bug': ['bug', 'fix', 'error', 'issue', '修正', 'エラー', 'バグ'],
-              'enhancement': ['feat', 'feature', 'improve', 'enhance', '機能', '改善', '追加'],
-              'performance': ['perf', 'performance', 'speed', 'optimize', 'パフォーマンス', '最適化'],
-              'security': ['security', 'auth', 'login', 'セキュリティ', '認証'],
               'ui/ux': ['ui', 'ux', 'design', 'style', 'css', 'デザイン', 'スタイル']
             };
 
@@ -124,19 +128,19 @@ jobs:
             const existingLabelNames = existingLabels.map(label => label.name);
 
             // 必要なラベルを作成
-            for (const [labelName, rule] of Object.entries(labelRules)) {
-              if (labelsToAdd.has(labelName) && !existingLabelNames.includes(labelName)) {
+            for (const rule of labelRules) {
+              if (labelsToAdd.has(rule.name) && !existingLabelNames.includes(rule.name)) {
                 try {
                   await github.rest.issues.createLabel({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    name: labelName,
+                    name: rule.name,
                     color: rule.color,
                     description: rule.description
                   });
-                  console.log(`Created label: ${labelName}`);
+                  console.log(`Created label: ${rule.name}`);
                 } catch (error) {
-                  console.log(`Label ${labelName} already exists or failed to create`);
+                  console.log(`Label ${rule.name} already exists or failed to create`);
                 }
               }
             }
