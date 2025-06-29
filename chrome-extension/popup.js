@@ -145,7 +145,9 @@ function extractPageInfo() {
     document.querySelector(META_SELECTORS.DESCRIPTION)?.content ||
     document.querySelector(META_SELECTORS.OG_DESCRIPTION)?.content ||
     "";
-  const image_url = document.querySelector(META_SELECTORS.OG_IMAGE)?.content || "";
+  
+  const ogImageElement = document.querySelector(META_SELECTORS.OG_IMAGE);
+  const image_url = ogImageElement?.content || ogImageElement?.getAttribute('content') || "";
 
   return {
     title,
