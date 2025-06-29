@@ -2,19 +2,35 @@
 
 import CsvDownloadButton from "@/components/common/CsvDownloadButton";
 import type { UserMonthlyBookmark } from "@/types/dashboard";
-import { use } from "react";
-
-async function fetchUserMonthlyData() {
-  const response = await fetch("/api/dashboard/users/monthly");
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const data = await response.json();
-  return data.userMonthlyBookmarks || [];
-}
+import { useEffect, useState } from "react";
 
 export default function UserBookmarkTable() {
-  const users = use(fetchUserMonthlyData());
+  const [users, setUsers] = useState<UserMonthlyBookmark[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserMonthlyData = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+        const response = await fetch(`${baseUrl}/api/dashboard/users/monthly`);
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        const data = await response.json();
+        setUsers(data.userMonthlyBookmarks || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserMonthlyData();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
