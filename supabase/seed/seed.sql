@@ -1,7 +1,3 @@
--- 既存データを削除
-DELETE FROM urls;
-DELETE FROM users;
-
 -- テストユーザー作成
 INSERT INTO users (id, email, password) VALUES 
 (1, 'test@example.com', '$2b$12$nuMe9IylSrG9J1ZdmI9r3uBNBUnicX8s/Dkj5DJc0as8W0oN9kSZm'),

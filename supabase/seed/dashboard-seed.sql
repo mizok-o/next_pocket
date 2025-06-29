@@ -1,20 +1,16 @@
 -- Dashboard用追加seedデータ
 -- 既存のseed.sqlに追加で実行される
 
--- 新規ユーザー10名を追加 (ID: 3-12)
-INSERT INTO users (id, email, password, created_at, updated_at) VALUES
-(3, 'user01@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(4, 'user02@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(5, 'user03@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(6, 'user04@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(7, 'user05@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(8, 'user06@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(9, 'user07@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(10, 'user08@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(11, 'user09@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
-(12, 'user10@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW());
+-- 新規ユーザー100名を追加 (ID: 3-102)
+DO $$
+BEGIN
+    FOR i IN 3..102 LOOP
+        INSERT INTO users (id, email, password, created_at, updated_at) VALUES
+        (i, 'user' || LPAD((i-2)::TEXT, 3, '0') || '@test.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW());
+    END LOOP;
+END $$;
 
--- 4-6月期間（6/28まで）のダッシュボード用データ生成
+-- 月5万件のデータ生成 (2024年4月から現在まで)
 DO $$
 DECLARE
     base_urls TEXT[] := ARRAY[
@@ -68,9 +64,12 @@ DECLARE
         'https://images.unsplash.com/photo-1551808525-51a94da548ce'
     ];
     
-    start_date DATE := '2024-04-01';
-    end_date DATE := '2024-06-28';
-    total_days INTEGER;
+    current_month_year INTEGER;
+    current_month INTEGER;
+    processing_date DATE;
+    month_start_date DATE;
+    month_end_date DATE;
+    days_in_month INTEGER;
     target_user INTEGER;
     insert_date TIMESTAMP;
     base_url TEXT;
@@ -79,94 +78,111 @@ DECLARE
     img_url TEXT;
     full_url TEXT;
     url_title TEXT;
-    hour_weight FLOAT;
     random_val FLOAT;
     target_hour INTEGER;
+    total_records_created INTEGER := 0;
     
 BEGIN
-    total_days := end_date - start_date + 1;
+    -- 2025年4月から現在月まで各月500,000件ずつ生成
+    processing_date := '2025-04-01'::DATE;
     
-    -- 50,000件のデータを生成
-    FOR i IN 1..50000 LOOP
-        -- ユーザーID 3-12にランダム割り当て
-        target_user := 3 + ((i - 1) % 10);
+    WHILE processing_date <= DATE_TRUNC('month', CURRENT_DATE) LOOP
+        -- 月の開始日と終了日を計算
+        month_start_date := DATE_TRUNC('month', processing_date);
+        month_end_date := (month_start_date + INTERVAL '1 month' - INTERVAL '1 day')::DATE;
+        days_in_month := EXTRACT(DAY FROM month_end_date);
         
-        -- 4月1日から6月28日までの期間でランダム日付生成
-        insert_date := start_date + (random() * total_days)::INTEGER;
+        RAISE NOTICE 'Processing month: % (% days)', TO_CHAR(month_start_date, 'YYYY-MM'), days_in_month;
         
-        -- 時間帯別分散パターンを適用
-        random_val := random();
-        IF random_val <= 0.35 THEN
-            -- 09:00-12:00 (35%)
-            target_hour := 9 + floor(random() * 4)::INTEGER;
-        ELSIF random_val <= 0.50 THEN
-            -- 13:00-14:00 (15%)
-            target_hour := 13 + floor(random() * 2)::INTEGER;
-        ELSIF random_val <= 0.80 THEN
-            -- 15:00-18:00 (30%)
-            target_hour := 15 + floor(random() * 4)::INTEGER;
-        ELSIF random_val <= 0.95 THEN
-            -- 19:00-23:00 (15%)
-            target_hour := 19 + floor(random() * 5)::INTEGER;
-        ELSE
-            -- 00:00-08:00 (5%)
-            target_hour := floor(random() * 9)::INTEGER;
-        END IF;
+        -- 各月500,000件のデータを生成
+        FOR i IN 1..500000 LOOP
+            -- ユーザーID 3-102にランダム割り当て
+            target_user := 3 + ((i - 1) % 100);
+            
+            -- 当該月内でランダム日付生成
+            insert_date := month_start_date + (random() * (days_in_month - 1))::INTEGER;
+            
+            -- 時間帯別分散パターンを適用
+            random_val := random();
+            IF random_val <= 0.35 THEN
+                -- 09:00-12:00 (35%)
+                target_hour := 9 + floor(random() * 4)::INTEGER;
+            ELSIF random_val <= 0.50 THEN
+                -- 13:00-14:00 (15%)
+                target_hour := 13 + floor(random() * 2)::INTEGER;
+            ELSIF random_val <= 0.80 THEN
+                -- 15:00-18:00 (30%)
+                target_hour := 15 + floor(random() * 4)::INTEGER;
+            ELSIF random_val <= 0.95 THEN
+                -- 19:00-23:00 (15%)
+                target_hour := 19 + floor(random() * 5)::INTEGER;
+            ELSE
+                -- 00:00-08:00 (5%)
+                target_hour := floor(random() * 9)::INTEGER;
+            END IF;
+            
+            -- 最終的な日時を設定
+            insert_date := insert_date + INTERVAL '1 hour' * target_hour + 
+                           INTERVAL '1 minute' * floor(random() * 60) + 
+                           INTERVAL '1 second' * floor(random() * 60);
+            
+            -- ランダムなデータを選択
+            base_url := base_urls[1 + floor(random() * array_length(base_urls, 1))];
+            keyword := tech_keywords[1 + floor(random() * array_length(tech_keywords, 1))];
+            desc_text := descriptions[1 + floor(random() * array_length(descriptions, 1))];
+            
+            -- 70%の確率で画像URLを設定
+            IF random() <= 0.7 THEN
+                img_url := image_urls[1 + floor(random() * array_length(image_urls, 1))];
+            ELSE
+                img_url := NULL;
+            END IF;
+            
+            -- URLとタイトルを生成
+            full_url := base_url || lower(replace(keyword, ' ', '-')) || '/' || floor(random() * 10000);
+            url_title := keyword || ' - ' || 
+                    CASE floor(random() * 5)
+                        WHEN 0 THEN 'チュートリアル'
+                        WHEN 1 THEN 'ドキュメント'
+                        WHEN 2 THEN 'ガイド'
+                        WHEN 3 THEN 'リファレンス'
+                        ELSE 'ベストプラクティス'
+                    END;
+            
+            -- データを挿入
+            INSERT INTO urls (
+                url, 
+                title, 
+                description, 
+                image_url, 
+                user_id, 
+                created_at, 
+                updated_at, 
+                is_favorite
+            ) VALUES (
+                full_url,
+                url_title,
+                desc_text || ' - ' || keyword,
+                img_url,
+                target_user,
+                insert_date,
+                insert_date,
+                random() <= 0.1  -- 10%の確率でお気に入り
+            );
+            
+            total_records_created := total_records_created + 1;
+            
+            -- 進捗表示（50,000件ごと）
+            IF i % 50000 = 0 THEN
+                RAISE NOTICE 'Month % progress: % / 500000', TO_CHAR(month_start_date, 'YYYY-MM'), i;
+            END IF;
+        END LOOP;
         
-        -- 最終的な日時を設定
-        insert_date := insert_date + INTERVAL '1 hour' * target_hour + 
-                       INTERVAL '1 minute' * floor(random() * 60) + 
-                       INTERVAL '1 second' * floor(random() * 60);
+        RAISE NOTICE 'Completed month %: 500,000 URLs inserted', TO_CHAR(month_start_date, 'YYYY-MM');
         
-        -- ランダムなデータを選択
-        base_url := base_urls[1 + floor(random() * array_length(base_urls, 1))];
-        keyword := tech_keywords[1 + floor(random() * array_length(tech_keywords, 1))];
-        desc_text := descriptions[1 + floor(random() * array_length(descriptions, 1))];
-        
-        -- 70%の確率で画像URLを設定
-        IF random() <= 0.7 THEN
-            img_url := image_urls[1 + floor(random() * array_length(image_urls, 1))];
-        ELSE
-            img_url := NULL;
-        END IF;
-        
-        -- URLとタイトルを生成
-        full_url := base_url || lower(replace(keyword, ' ', '-')) || '/' || floor(random() * 10000);
-        url_title := keyword || ' - ' || 
-                CASE floor(random() * 5)
-                    WHEN 0 THEN 'チュートリアル'
-                    WHEN 1 THEN 'ドキュメント'
-                    WHEN 2 THEN 'ガイド'
-                    WHEN 3 THEN 'リファレンス'
-                    ELSE 'ベストプラクティス'
-                END;
-        
-        -- データを挿入
-        INSERT INTO urls (
-            url, 
-            title, 
-            description, 
-            image_url, 
-            user_id, 
-            created_at, 
-            updated_at, 
-            is_favorite
-        ) VALUES (
-            full_url,
-            url_title,
-            desc_text || ' - ' || keyword,
-            img_url,
-            target_user,
-            insert_date,
-            insert_date,
-            random() <= 0.1  -- 10%の確率でお気に入り
-        );
-        
-        -- 進捗表示（10,000件ごと）
-        IF i % 10000 = 0 THEN
-            RAISE NOTICE 'Dashboard seed progress: % / 50000', i;
-        END IF;
+        -- 次の月に進む
+        processing_date := processing_date + INTERVAL '1 month';
     END LOOP;
     
-    RAISE NOTICE 'Dashboard seed completed: 50,000 URLs inserted for users 3-12';
+    RAISE NOTICE 'Dashboard seed completed: % total URLs inserted for users 3-102', total_records_created;
 END $$;
