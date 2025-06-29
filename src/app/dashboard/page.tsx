@@ -1,5 +1,4 @@
 import Header from "@/components/Header";
-import HourlyActiveTable from "@/components/dashboard/hourly/HourlyActiveTable";
 import KPICardsWrapper from "@/components/dashboard/kpi/KPICardsWrapper";
 import UserBookmarkTableWrapper from "@/components/dashboard/users/UserBookmarkTableWrapper";
 
@@ -19,7 +18,6 @@ export default function DashboardPage() {
 
             <div className="space-y-8">
               <UserBookmarkTableWrapper />
-              <HourlyActiveTable />
             </div>
           </main>
         </div>

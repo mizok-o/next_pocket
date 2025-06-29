@@ -1,36 +1,7 @@
-"use client";
+import { getKPIData } from "@/lib/data/dashboard";
 
-import type { KPICardData } from "@/types/dashboard";
-import { useEffect, useState } from "react";
-
-export default function KPICards() {
-  const [kpiData, setKpiData] = useState<KPICardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchKPIData = async () => {
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-        const response = await fetch(`${baseUrl}/api/dashboard/kpi`);
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        const data = await response.json();
-        setKpiData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchKPIData();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!kpiData) return null;
+export default async function KPICards() {
+  const kpiData = await getKPIData();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
