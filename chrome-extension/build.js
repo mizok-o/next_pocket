@@ -52,7 +52,7 @@ function buildExtension() {
       name: "Ato（あと）",
       version: "1.0.0",
       description: "あとで読みたい、すべてを記録する",
-      permissions: ["activeTab", "storage", "notifications", "scripting", "tabs"],
+      permissions: ["activeTab", "storage", "scripting"],
       host_permissions: config.host_permissions,
       background: {
         service_worker: "background.js",
