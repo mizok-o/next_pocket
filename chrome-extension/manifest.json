@@ -3,15 +3,15 @@
   "name": "Ato（あと）",
   "version": "1.0.0",
   "description": "あとで読みたい、すべてを記録する",
-  "permissions": ["activeTab", "storage", "notifications", "scripting", "tabs"],
-  "host_permissions": ["http://localhost:3000/*", "https://*/*"],
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["https://next-pocket-five.vercel.app/*", "https://*/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["http://localhost:3000/*"],
+      "matches": ["https://next-pocket-five.vercel.app/*"],
       "js": ["content-script.js"]
     }
   ],

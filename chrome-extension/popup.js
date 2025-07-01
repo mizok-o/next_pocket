@@ -61,9 +61,7 @@ function showErrorState(message) {
   });
 
   document.getElementById("auth-btn").addEventListener("click", () => {
-    chrome.tabs.create({
-      url: `${API_BASE_URL}/auth/extension`,
-    });
+    window.open(`${API_BASE_URL}/auth/extension`, '_blank');
     window.close();
   });
 }
