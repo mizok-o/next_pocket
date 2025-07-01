@@ -1,20 +1,9 @@
-"use client";
-
 import CsvDownloadButton from "@/components/common/CsvDownloadButton";
+import { getUserMonthlyData } from "@/lib/data/dashboard";
 import type { UserMonthlyBookmark } from "@/types/dashboard";
-import { use } from "react";
 
-async function fetchUserMonthlyData() {
-  const response = await fetch("/api/dashboard/users/monthly");
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const data = await response.json();
-  return data.userMonthlyBookmarks || [];
-}
-
-export default function UserBookmarkTable() {
-  const users = use(fetchUserMonthlyData());
+export default async function UserBookmarkTable() {
+  const users = await getUserMonthlyData();
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
