@@ -9,27 +9,12 @@ import { LoadingState } from "@/components/LoadingState";
 import { useBookmarks } from "@/hooks/useBookmarks";
 
 export default function BookmarkList() {
-  const { urls, loading, error, deleteBookmark, toggleFavorite, refetch } = useBookmarks();
+  const { urls, loading, error, refetch } = useBookmarks();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const handleMenuClick = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setOpenMenuId(openMenuId === id ? null : id);
-  };
-
-  const handleDelete = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    await deleteBookmark(id);
-    setOpenMenuId(null);
-  };
-
-  const handleToggleFavorite = async (
-    bookmarkId: number,
-    currentIsFavoriteStatus: boolean,
-    clickEvent: React.MouseEvent
-  ) => {
-    clickEvent.stopPropagation();
-    await toggleFavorite(bookmarkId, currentIsFavoriteStatus);
   };
 
   useEffect(() => {
@@ -62,13 +47,7 @@ export default function BookmarkList() {
     <ul className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {urls.map((url) => (
         <li key={url.id}>
-          <BookmarkCard
-            url={url}
-            onDelete={handleDelete}
-            onToggleFavorite={handleToggleFavorite}
-            openMenuId={openMenuId}
-            onMenuClick={handleMenuClick}
-          />
+          <BookmarkCard url={url} openMenuId={openMenuId} onMenuClick={handleMenuClick} />
         </li>
       ))}
     </ul>

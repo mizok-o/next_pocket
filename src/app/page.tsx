@@ -1,6 +1,7 @@
 "use client";
 
 import BookmarkList from "@/components/BookmarkList";
+import { LoadingState } from "@/components/LoadingState";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -18,18 +19,7 @@ export default function Home() {
   }, [session, status, router]);
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="flex items-center space-x-3">
-          <div
-            className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
-            role="status"
-            aria-label="読み込み中"
-          />
-          <span className="text-gray-600 font-medium">読み込み中...</span>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!session) {

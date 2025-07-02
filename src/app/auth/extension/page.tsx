@@ -1,5 +1,6 @@
 "use client";
 
+import { LoadingState } from "@/components/LoadingState";
 import { useSession } from "next-auth/react";
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -50,20 +51,7 @@ export default function ExtensionAuth() {
   };
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="flex items-center space-x-3 mb-4">
-            <div
-              className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
-              role="status"
-              aria-label="読み込み中"
-            />
-            <span className="text-gray-600 font-medium">認証状態を確認中...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!session) {
@@ -113,16 +101,7 @@ export default function ExtensionAuth() {
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-gray-900 tracking-tight mb-6">認証完了</h1>
 
-          {loading && (
-            <div className="flex items-center justify-center space-x-3 py-4">
-              <div
-                className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
-                role="status"
-                aria-label="読み込み中"
-              />
-              <span className="text-gray-600 font-medium">トークンを生成中...</span>
-            </div>
-          )}
+          {loading && <LoadingState />}
 
           {token && (
             <div>
