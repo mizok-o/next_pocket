@@ -1,4 +1,5 @@
 "use client";
+import { LoadingState } from "@/components/LoadingState";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -23,16 +24,7 @@ function LoginForm() {
   }, [searchParams]);
 
   if (status === "loading") {
-    return (
-      <div className="flex items-center space-x-3">
-        <div
-          className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
-          role="status"
-          aria-label="読み込み中"
-        />
-        <span className="text-gray-600 font-medium">読み込み中...</span>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (status === "authenticated") {
@@ -87,18 +79,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Suspense
-        fallback={
-          <div className="flex items-center space-x-3">
-            <div
-              className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
-              role="status"
-              aria-label="読み込み中"
-            />
-            <span className="text-gray-600 font-medium">読み込み中...</span>
-          </div>
-        }
-      >
+      <Suspense fallback={<LoadingState />}>
         <LoginForm />
       </Suspense>
     </div>
