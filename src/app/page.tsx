@@ -1,6 +1,8 @@
 "use client";
 
 import BookmarkList from "@/components/BookmarkList";
+import { Container } from "@/components/common";
+import { Spinner } from "@/components/ui";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -21,11 +23,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex items-center space-x-3">
-          <div
-            className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"
-            role="status"
-            aria-label="読み込み中"
-          />
+          <Spinner size="md" color="primary" />
           <span className="text-gray-600 font-medium">読み込み中...</span>
         </div>
       </div>
@@ -40,7 +38,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-indigo-600/5 pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <Container maxWidth="xl" className="relative py-16">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="relative">
@@ -61,7 +59,7 @@ export default function Home() {
             </p>
           </div>
           <BookmarkList />
-        </div>
+        </Container>
       </div>
     </div>
   );
