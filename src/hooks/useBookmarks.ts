@@ -1,4 +1,4 @@
-import type { Url } from "@/types";
+import type { Url, UrlsResponse } from "@/types";
 import * as Sentry from "@sentry/nextjs";
 import { useCallback, useEffect, useState } from "react";
 
@@ -16,8 +16,8 @@ export const useBookmarks = () => {
         throw new Error(errorData.error || "Failed to fetch URLs");
       }
 
-      const { data }: { data: Url[] } = await response.json();
-      setUrls(data || []);
+      const result: UrlsResponse = await response.json();
+      setUrls(result.data || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred";
       Sentry.captureException(err);
