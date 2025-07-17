@@ -5,4 +5,4 @@ Next.js + Supabase +Chrome拡張機能のブックマーク管理アプリ
 - コメントは不要
 
 # 禁止コマンド
-- git push/pull は使用しない（ユーザーが手動で実行）
+- git push/pull は使用しない
