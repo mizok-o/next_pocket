@@ -1,3 +1,4 @@
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ExternalLinkIcon, ImagePlaceholderIcon, MenuIcon, StarIcon } from "@/components/icons";
 import type { Url } from "@/types";
 import Image from "next/image";
@@ -19,6 +20,7 @@ export const BookmarkCard = ({
   onMenuClick,
 }: BookmarkCardProps) => {
   const [imageError, setImageError] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleNewTabClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -105,7 +107,11 @@ export const BookmarkCard = ({
             <li>
               <button
                 type="button"
-                onClick={(e) => onDelete(url.id, e)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowDeleteConfirm(true);
+                }}
                 className="block w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50/80 transition-colors font-medium cursor-pointer"
               >
                 削除
@@ -123,6 +129,23 @@ export const BookmarkCard = ({
       >
         <ExternalLinkIcon className="w-3.5 h-3.5 text-blue-600" />
       </button>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="ブックマークを削除"
+        message={`「${url.title || url.url}」を削除しますか？この操作は元に戻すことができません。`}
+        confirmText="削除"
+        cancelText="キャンセル"
+        variant="danger"
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          onDelete(url.id, {
+            preventDefault: () => {},
+            stopPropagation: () => {},
+          } as React.MouseEvent);
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </button>
   );
 };

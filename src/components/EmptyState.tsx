@@ -7,6 +7,27 @@ export const EmptyState = () => (
         <BookmarkIcon className="h-10 w-10 text-slate-400" />
       </div>
       <h3 className="text-slate-900 font-semibold mb-3 text-xl">ブックマークがありません</h3>
+      <p className="text-slate-600 text-sm mb-6">
+        ブックマークを追加して、お気に入りのページを整理しましょう。
+      </p>
+      <div className="flex items-center justify-center gap-2 text-blue-600">
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          role="img"
+          aria-label="追加アイコン"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          />
+        </svg>
+        <span className="text-sm font-medium">ブラウザ拡張機能で簡単追加</span>
+      </div>
     </div>
   </div>
 );
