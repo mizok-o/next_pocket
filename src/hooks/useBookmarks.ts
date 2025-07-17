@@ -52,26 +52,44 @@ export const useBookmarks = () => {
     [urls]
   );
 
-  const toggleFavorite = async (bookmarkId: number, currentIsFavoriteStatus: boolean) => {
-    try {
-      const response = await fetch(`/api/urls/${bookmarkId}/favorite`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ is_favorite: !currentIsFavoriteStatus }),
-      });
+  const toggleFavorite = useCallback(
+    async (bookmarkId: number, currentIsFavoriteStatus: boolean) => {
+      const originalUrls = urls;
+      const newIsFavoriteStatus = !currentIsFavoriteStatus;
 
-      if (!response.ok) {
-        throw new Error("Failed to update favorite status");
+      setUrls((prevUrls) =>
+        prevUrls
+          .map((url) =>
+            url.id === bookmarkId ? { ...url, is_favorite: newIsFavoriteStatus } : url
+          )
+          .sort((a, b) => {
+            if (a.is_favorite !== b.is_favorite) {
+              return b.is_favorite ? 1 : -1;
+            }
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          })
+      );
+
+      try {
+        const response = await fetch(`/api/urls/${bookmarkId}/favorite`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ is_favorite: newIsFavoriteStatus }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update favorite status");
+        }
+      } catch (error) {
+        setUrls(originalUrls);
+        Sentry.captureException(error);
+        console.error("Failed to toggle favorite:", error);
       }
-
-      fetchUrls();
-    } catch (error) {
-      Sentry.captureException(error);
-      console.error("Failed to toggle favorite:", error);
-    }
-  };
+    },
+    [urls]
+  );
 
   const refetch = () => {
     setError(null);
