@@ -52,9 +52,9 @@ export const useBookmarks = () => {
     [urls]
   );
 
-  const toggleFavorite = async (bookmarkId: number, currentIsFavoriteStatus: boolean) => {
+  const toggleFavorite = async (urlId: number, currentIsFavoriteStatus: boolean) => {
     try {
-      const response = await fetch(`/api/urls/${bookmarkId}/favorite`, {
+      const response = await fetch(`/api/urls/${urlId}/favorite`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
