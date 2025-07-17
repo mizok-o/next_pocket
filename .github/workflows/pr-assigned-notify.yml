@@ -9,21 +9,18 @@ jobs:
     # reviewerが存在する場合のみ実行
     if: github.event.requested_reviewer != null
     steps:
-      - name: Send Slack notification
-        uses: 8398a7/action-slack@v3
-        with:
-          status: custom
-          custom_payload: |
-            {
-              "text": "📝 Review requested: ${{ github.event.pull_request.title }}\n<@${{ fromJson(secrets.SLACK_USER_MAP)[github.event.requested_reviewer.login] }}>${{ github.event.pull_request.assignee != null && format(' <@{0}>', fromJson(secrets.SLACK_USER_MAP)[github.event.pull_request.assignee.login]) || '' }}",
-              "attachments": [{
-                "color": "warning",
-                "fields": [{
-                  "title": "PR",
-                  "value": "<${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}>",
-                  "short": true
+      - name: Slack通知を送信
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \"📝 レビュー依頼: ${{ github.event.pull_request.title }}\n<@${{ fromJson(secrets.SLACK_USER_MAP)[github.event.requested_reviewer.login] }}>${{ github.event.pull_request.assignee != null && github.event.pull_request.assignee.login != github.event.requested_reviewer.login && format(' <@{0}>', fromJson(secrets.SLACK_USER_MAP)[github.event.pull_request.assignee.login]) || '' }}\",
+              \"attachments\": [{
+                \"color\": \"good\",
+                \"fields\": [{
+                  \"title\": \"プルリクエスト\",
+                  \"value\": \"<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\",
+                  \"short\": true
                 }]
               }]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+            }" \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
