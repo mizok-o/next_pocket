@@ -15,14 +15,10 @@ jobs:
           status: custom
           custom_payload: |
             {
-              "text": "📝 Review requested: ${{ github.event.pull_request.title }}",
+              "text": "📝 Review requested: ${{ github.event.pull_request.title }}\n<@${{ fromJson(secrets.SLACK_USER_MAP)[github.event.requested_reviewer.login] }}>${{ github.event.pull_request.assignee != null && format(' <@{0}>', fromJson(secrets.SLACK_USER_MAP)[github.event.pull_request.assignee.login]) || '' }}",
               "attachments": [{
                 "color": "warning",
                 "fields": [{
-                  "title": "Reviewer",
-                  "value": "<@${{ fromJson(secrets.SLACK_USER_MAP)[github.event.requested_reviewer.login] }}>",
-                  "short": true
-                }${{ github.event.pull_request.assignee != null && format(', {{"title": "Assignee", "value": "<@{0}>", "short": true}}', fromJson(secrets.SLACK_USER_MAP)[github.event.pull_request.assignee.login]) || '' }}, {
                   "title": "PR",
                   "value": "<${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}>",
                   "short": true
