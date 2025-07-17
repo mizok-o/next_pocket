@@ -1,3 +1,5 @@
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ToastContainer } from "@/components/ToastContainer";
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./Providers";
@@ -20,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <ErrorBoundary>
+          <Providers>{children}</Providers>
+          <ToastContainer />
+        </ErrorBoundary>
       </body>
     </html>
   );

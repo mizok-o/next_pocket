@@ -9,7 +9,10 @@ export const LoadingState = () => (
         />
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 animate-pulse" />
       </div>
-      <span className="text-slate-600 font-medium text-lg">読み込み中...</span>
+      <div className="text-center">
+        <span className="text-slate-600 font-medium text-lg">読み込み中...</span>
+        <p className="text-slate-400 text-sm mt-1">ブックマークを取得しています</p>
+      </div>
     </div>
   </div>
 );
