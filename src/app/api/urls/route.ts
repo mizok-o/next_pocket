@@ -1,9 +1,11 @@
 import { supabase } from "@/app/supabaseClient";
 import { getUserId } from "@/lib/supabaseServer";
+import type { CreateUrlRequest, ErrorResponse, UrlResponse, UrlsResponse } from "@/types";
+import { validateCreateUrlRequest } from "@/types";
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET(request: Request): Promise<NextResponse<UrlsResponse | ErrorResponse>> {
   try {
     const userId = await getUserId(request);
 
@@ -22,17 +24,19 @@ export async function GET(request: Request) {
       .order("created_at", { ascending: false });
 
     if (error) {
+      console.error("Database error:", error);
       return NextResponse.json({ error: "Failed to fetch URLs" }, { status: 500 });
     }
 
     return NextResponse.json({ data: data || [] });
   } catch (error) {
+    console.error("Unexpected error in GET /api/urls:", error);
     Sentry.captureException(error);
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse<UrlResponse | ErrorResponse>> {
   try {
     const userId = await getUserId(request);
 
@@ -41,11 +45,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { url, title, description, image_url } = body;
 
-    if (!url) {
-      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    if (!validateCreateUrlRequest(body)) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
+
+    const { url, title, description, image_url } = body as CreateUrlRequest;
 
     // Validate user ID is numeric
     const userIdInt = Number.parseInt(userId, 10);
@@ -66,11 +71,13 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
+      console.error("Database error:", error);
       return NextResponse.json({ error: "Failed to create URL" }, { status: 500 });
     }
 
     return NextResponse.json({ data });
   } catch (error) {
+    console.error("Unexpected error in POST /api/urls:", error);
     Sentry.captureException(error);
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
