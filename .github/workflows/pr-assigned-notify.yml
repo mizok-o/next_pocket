@@ -13,14 +13,6 @@ jobs:
         run: |
           curl -X POST -H 'Content-type: application/json' \
             --data "{
-              \"text\": \"📝 レビュー依頼: ${{ github.event.pull_request.title }}\n<@${{ fromJson(secrets.SLACK_USER_MAP)[github.event.requested_reviewer.login] }}>${{ github.event.pull_request.assignee != null && github.event.pull_request.assignee.login != github.event.requested_reviewer.login && format(' <@{0}>', fromJson(secrets.SLACK_USER_MAP)[github.event.pull_request.assignee.login]) || '' }}\",
-              \"attachments\": [{
-                \"color\": \"good\",
-                \"fields\": [{
-                  \"title\": \"プルリクエスト\",
-                  \"value\": \"<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\",
-                  \"short\": true
-                }]
-              }]
+              \"text\": \"<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\n${{ github.event.pull_request.assignee != null && github.event.pull_request.assignee.login != github.event.requested_reviewer.login && format('<@{0}> → ', fromJson(secrets.SLACK_USER_MAP)[github.event.pull_request.assignee.login]) || '' }}<@${{ fromJson(secrets.SLACK_USER_MAP)[github.event.requested_reviewer.login] }}>\"
             }" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
