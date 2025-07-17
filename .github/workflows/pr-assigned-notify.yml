@@ -10,9 +10,28 @@ jobs:
     if: github.event.requested_reviewer != null
     steps:
       - name: Slack通知を送信
-        run: |
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{
-              \"text\": \"<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\n${{ github.event.pull_request.assignee != null && github.event.pull_request.assignee.login != github.event.requested_reviewer.login && format('<@{0}> → ', fromJson(secrets.SLACK_USER_MAP)[github.event.pull_request.assignee.login]) || '' }}<@${{ fromJson(secrets.SLACK_USER_MAP)[github.event.requested_reviewer.login] }}>\"
-            }" \
-            ${{ secrets.SLACK_WEBHOOK_URL }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const assignees = context.payload.pull_request.assignees || [];
+            const reviewer = context.payload.requested_reviewer.login;
+            const userMap = JSON.parse(process.env.SLACK_USER_MAP);
+            
+            let assigneeMentions = '';
+            if (assignees.length > 0) {
+              const mentions = assignees.map(assignee => `<@${userMap[assignee.login]}>`).join(' ');
+              assigneeMentions = `${mentions} → `;
+            }
+            
+            const payload = {
+              text: `<${context.payload.pull_request.html_url}|${context.payload.pull_request.title}>\n${assigneeMentions}<@${userMap[reviewer]}>`
+            };
+            
+            await fetch(process.env.SLACK_WEBHOOK_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USER_MAP: ${{ secrets.SLACK_USER_MAP }}
