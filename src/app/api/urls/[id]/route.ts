@@ -1,9 +1,14 @@
 import { supabase } from "@/app/supabaseClient";
 import { getUserId } from "@/lib/supabaseServer";
+import type { ErrorResponse, UpdateUrlRequest, UrlResponse } from "@/types";
+import { validateUpdateUrlRequest } from "@/types";
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<{ success?: boolean } | ErrorResponse>> {
   try {
     const userId = await getUserId(request);
 
@@ -34,6 +39,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       .single();
 
     if (error) {
+      console.error("Database error:", error);
       return NextResponse.json({ error: "Failed to delete URL" }, { status: 500 });
     }
 
@@ -43,6 +49,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Unexpected error in DELETE /api/urls/[id]:", error);
     Sentry.captureException(error);
     return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }

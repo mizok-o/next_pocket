@@ -1,8 +1,12 @@
 import { supabase } from "@/app/supabaseClient";
 import { getUserId } from "@/lib/supabaseServer";
+import type { ErrorResponse, UrlResponse } from "@/types";
 import { NextResponse } from "next/server";
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<UrlResponse | ErrorResponse>> {
   try {
     const userId = await getUserId(request);
 
